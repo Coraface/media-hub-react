@@ -1,10 +1,11 @@
+import { Link } from "react-router-dom";
 import { Media } from "../api/types/media";
 import theMovieDb from "../scripts/themoviedb";
 
 export default function MediaCard({ media }: { media: Media }) {
   return (
-    <a
-      href="#"
+    <Link
+      to={`/media-details?id=${media.id}&media-type=${media.media_type}`}
       className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
     >
       <img
@@ -16,10 +17,13 @@ export default function MediaCard({ media }: { media: Media }) {
         <h5 className="mb-1 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
           {media.title}
         </h5>
+        <p className="mb-1 text-md font-normal text-gray-700 dark:text-gray-400 line-clamp-3">
+          ({media.release_date}) | {media.genres}
+        </p>
         <p className="text-sm font-normal text-gray-700 dark:text-gray-400 line-clamp-3">
           {media.overview}
         </p>
       </div>
-    </a>
+    </Link>
   );
 }

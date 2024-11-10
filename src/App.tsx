@@ -21,14 +21,14 @@ const router = createBrowserRouter([
         element: <SearchPage />,
       },
       {
-        path: "/media-details",
-        element: <MediaDetailsPage />,
-      },
-      {
         path: "/profile",
         element: <ProfilePage />,
       },
     ],
+  },
+  {
+    path: "/media-details",
+    element: <MediaDetailsPage />,
   },
 ]);
 

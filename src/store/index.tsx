@@ -11,4 +11,7 @@ export const store = configureStore({
 });
 
 setupListeners(store.dispatch);
-export { useFetchMediaQuery } from "./apis/mediaApi";
+export {
+  useSearchMediaQuery,
+  useFetchMediaDetailsQuery,
+} from "./apis/mediaApi";

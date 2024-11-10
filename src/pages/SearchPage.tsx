@@ -1,4 +1,4 @@
-import { useFetchMediaQuery } from "../store";
+import { useSearchMediaQuery } from "../store";
 import MediaCard from "../components/MediaCard";
 
 const getQueryParam = (param: string) => {
@@ -13,7 +13,7 @@ const getQueryParam = (param: string) => {
 
 export default function SearchPage() {
   const term = getQueryParam("term");
-  const { data, error, isLoading } = useFetchMediaQuery(term);
+  const { data, error, isLoading } = useSearchMediaQuery(term);
   console.log(data, error, isLoading);
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading media</div>;
