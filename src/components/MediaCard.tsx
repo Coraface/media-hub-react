@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { Media } from "../api/types/media";
+import { SearchMediaResponse } from "../api/types/media";
 import theMovieDb from "../scripts/themoviedb";
 
-export default function MediaCard({ media }: { media: Media }) {
+export default function MediaCard({ media }: { media: SearchMediaResponse }) {
   return (
     <Link
       to={`/media-details?id=${media.id}&media-type=${media.media_type}`}

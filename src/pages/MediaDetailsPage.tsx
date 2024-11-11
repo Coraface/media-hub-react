@@ -1,7 +1,4 @@
-import { Media } from "../api/types/media";
 import { useFetchMediaDetailsQuery } from "../store";
-import theMovieDb from "../scripts/themoviedb";
-import { describe } from "node:test";
 import MediaCardLabels from "../components/MediaCardLabel";
 
 const getQueryParam = (param: string) => {
@@ -34,7 +31,13 @@ export default function MediaDetailsPage() {
   ];
   const renderedLabels = info.map((info) => {
     if (info.value) {
-      return <MediaCardLabels label={info.label} value={info.value} />;
+      return (
+        <MediaCardLabels
+          key={info.label}
+          label={info.label}
+          value={info.value}
+        />
+      );
     }
   });
   return (
@@ -46,23 +49,23 @@ export default function MediaDetailsPage() {
       <div className="absolute inset-0 bg-black opacity-50"></div>
 
       {/* Container for content */}
-      <div className="relative flex flex-col w-full max-w-7xl p-6 text-white space-y-8 mt-10">
+      <div className="relative flex flex-col max-w-7xl p-6 text-white space-y-8 mt-10">
         {/* Title and Buttons */}
         <div className="flex items-center justify-between">
-          <h1 className="text-[4rem] text-white">{data?.title}</h1>
-          <div className="flex gap-4">
-            <button className="px-5 py-2 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]">
-              Add to WatchList
-            </button>
-            <button className="px-5 py-2 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]">
-              Add to Finished
-            </button>
-          </div>
+          <h1 className="text-[3rem] text-white">{data?.title}</h1>
         </div>
 
         {/* Data details in column format */}
         <div className="flex flex-col w-full md:w-1/2 space-y-6">
           {renderedLabels}
+        </div>
+        <div className="flex gap-4 mt-500">
+          <button className="px-5 py-2 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]">
+            Add to WatchList
+          </button>
+          <button className="px-5 py-2 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]">
+            Add to Finished
+          </button>
         </div>
       </div>
     </div>
