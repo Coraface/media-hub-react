@@ -6,38 +6,31 @@ import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
 import { Provider } from "react-redux";
 import { store } from "./store";
+import { ReactKeycloakProvider } from "@react-keycloak/web";
+import keycloak from "./keycloak/keycloak.ts";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
     children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: "/search",
-        element: <SearchPage />,
-      },
-      {
-        path: "/profile",
-        element: <ProfilePage />,
-      },
+      { index: true, element: <HomePage /> },
+      { path: "/search", element: <SearchPage /> },
+      { path: "/profile", element: <ProfilePage /> },
     ],
   },
-  {
-    path: "/media-details",
-    element: <MediaDetailsPage />,
-  },
+  { path: "/media-details", element: <MediaDetailsPage /> },
 ]);
 
-function App() {
+export default function App() {
   return (
-    <Provider store={store}>
-      <RouterProvider router={router} />
-    </Provider>
+    <ReactKeycloakProvider
+      authClient={keycloak}
+      initOptions={{ onLoad: "login-required" }}
+    >
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
+    </ReactKeycloakProvider>
   );
 }
-
-export default App;

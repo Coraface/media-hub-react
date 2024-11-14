@@ -3,15 +3,15 @@ export interface Media {
   id: number;
   title: string;
   media_type: string;
-  release_date: string;
+  year: string;
   overview: string;
-  poster_path: string;
-  genres: string;
-  vote_average: number;
+  imageUri: string;
+  genre: string;
+  rating: number;
   director: string;
-  runtime?: number;
-  number_of_episodes?: number;
-  number_of_seasons?: number;
+  durationMinutes?: number;
+  episodes?: number;
+  seasons?: number;
 }
 
 export interface SearchMediaResponse {

@@ -1,0 +1,5 @@
+{
+  "url": "http://keycloak:8080",
+  "realm": "quarkus",
+  "clientId": "frontend-service"
+}

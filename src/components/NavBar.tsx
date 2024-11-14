@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import SearchInput from "./SearchInput";
+import useKeycloakAuth from "../hooks/useKeycloakAuth";
 
 export default function NavBar() {
+  useKeycloakAuth();
+
   return (
     <div className="flex items-center justify-between px-4 border-b h-14">
       {/* Logo aligned to the left */}
@@ -17,8 +20,6 @@ export default function NavBar() {
           <SearchInput />
         </div>
       </div>
-
-      {/* Placeholder for spacing on the right to balance the layout */}
     </div>
   );
 }
