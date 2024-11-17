@@ -16,6 +16,8 @@ setupListeners(store.dispatch);
 export { useSearchMediaQuery, useFetchMediaDetailsQuery } from "./apis/tmdbApi";
 export {
   useFetchMediaStatusQuery,
-  useAddMediaMutation,
-  useRemoveMediaMutation,
+  useAddWantedMediaMutation,
+  useAddFinishedMediaMutation,
+  useRemoveWantedMediaMutation,
+  useRemoveFinishedMediaMutation,
 } from "./apis/mediaApi";

@@ -2,16 +2,23 @@ import MediaCardLabels from "../components/MediaCardLabel";
 import {
   useFetchMediaDetailsQuery,
   useFetchMediaStatusQuery,
-  useAddMediaMutation,
-  useRemoveMediaMutation,
+  useAddWantedMediaMutation,
+  useAddFinishedMediaMutation,
+  useRemoveWantedMediaMutation,
+  useRemoveFinishedMediaMutation,
 } from "../store";
 import { Media } from "../api/types/media";
 import Button from "../components/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 
 interface MediaStatusResponse {
-  isWanted: boolean;
-  isFinished: boolean;
+  data: {
+    isWanted: boolean;
+    isFinished: boolean;
+  };
+  error: FetchBaseQueryError;
+  isLoading: never;
 }
 
 const getQueryParam = (param: string) => {
@@ -28,14 +35,6 @@ export default function MediaDetailsPage() {
   const id: string = getQueryParam("id");
   const mediaType: string = getQueryParam("media-type");
 
-  // true if button should add, false if button should remove
-  const [wantedButtonStatus, setWantedButtonStatus] = useState<boolean | null>(
-    null
-  );
-  const [finishedButtonStatus, setFinishedButtonStatus] = useState<
-    boolean | null
-  >(null);
-
   const { data, error, isLoading } = useFetchMediaDetailsQuery({
     id,
     mediaType,
@@ -45,36 +44,88 @@ export default function MediaDetailsPage() {
     data: statusData,
     error: error2,
     isLoading: isLoading2,
-  } = useFetchMediaStatusQuery({
+  } = useFetchMediaStatusQuery<MediaStatusResponse>({
     mediaType,
     mediaId: parseInt(id),
   });
   console.log(statusData, error2, isLoading2);
 
-  const [addMedia, addMediaResults] = useAddMediaMutation();
-  const [removeMedia, removeMediaResults] = useRemoveMediaMutation();
+  // true if button should add, false if button should remove
+  const [wantedButtonStatus, setWantedButtonStatus] = useState<boolean | null>(
+    null
+  );
+  const [finishedButtonStatus, setFinishedButtonStatus] = useState<
+    boolean | null
+  >(null);
+
+  // Set button status when fetched data is available
+  useEffect(() => {
+    if (statusData) {
+      setWantedButtonStatus(statusData.isWanted);
+      setFinishedButtonStatus(statusData.isFinished);
+    }
+  }, [statusData]);
+  console.log("wanted/finished", wantedButtonStatus, finishedButtonStatus);
+
+  const [addWantedMedia, addWantedMediaResults] = useAddWantedMediaMutation();
+  const [addFinishedMedia, addFinishedMediaResults] =
+    useAddFinishedMediaMutation();
+  const [removeWantedMedia, removeWantedMediaResults] =
+    useRemoveWantedMediaMutation();
+  const [removeFinishedMedia, removeFinishedMediaResults] =
+    useRemoveFinishedMediaMutation();
+
+  useEffect(() => {
+    console.log("addWantedMediaResults:", addWantedMediaResults);
+    console.log("addFinishedMediaResults:", addFinishedMediaResults);
+    console.log("removeWantedMediaResults:", removeWantedMediaResults);
+    console.log("removeFinishedMediaResults:", removeFinishedMediaResults);
+    if (addWantedMediaResults.isSuccess) {
+      setWantedButtonStatus(true);
+      addWantedMediaResults.reset();
+    }
+    if (addFinishedMediaResults.isSuccess) {
+      setFinishedButtonStatus(true);
+      addFinishedMediaResults.reset();
+    }
+
+    if (removeWantedMediaResults.isSuccess) {
+      setWantedButtonStatus(false);
+      removeWantedMediaResults.reset();
+    }
+    if (removeFinishedMediaResults.isSuccess) {
+      setFinishedButtonStatus(false);
+      removeFinishedMediaResults.reset();
+    }
+  }, [
+    addWantedMediaResults,
+    addFinishedMediaResults,
+    removeWantedMediaResults,
+    removeFinishedMediaResults,
+  ]);
 
   const handleAddMedia = (data: Media, status: "wanted" | "finished") => {
     if (status === "wanted") {
-      setWantedButtonStatus(false);
+      addWantedMedia({ media: data, status });
     } else {
-      setFinishedButtonStatus(false);
+      addFinishedMedia({ media: data, status });
     }
-    setFinishedButtonStatus(status !== "finished");
-    addMedia({ media: data, status });
   };
 
   const handleRemoveMedia = (data: Media, status: "wanted" | "finished") => {
     if (status === "wanted") {
-      setWantedButtonStatus(true);
+      removeWantedMedia({
+        id: data.id,
+        mediaType: data.media_type === "movie" ? "movies" : "series",
+        status,
+      });
     } else {
-      setFinishedButtonStatus(true);
+      removeFinishedMedia({
+        id: data.id,
+        mediaType: data.media_type === "movie" ? "movies" : "series",
+        status,
+      });
     }
-    removeMedia({
-      id: data.id,
-      mediaType: data.media_type === "movie" ? "movies" : "series",
-      status,
-    });
   };
 
   const info = [
@@ -98,6 +149,7 @@ export default function MediaDetailsPage() {
       );
     }
   });
+
   return (
     <div
       className="relative w-full min-h-screen flex items-start justify-center bg-cover bg-center bg-no-repeat bg-fixed"
@@ -121,34 +173,34 @@ export default function MediaDetailsPage() {
           <Button
             loading={
               wantedButtonStatus
-                ? removeMediaResults.isLoading
-                : addMediaResults.isLoading
+                ? removeWantedMediaResults.isLoading
+                : addWantedMediaResults.isLoading
             }
             onClick={() =>
               data &&
               (wantedButtonStatus
-                ? handleAddMedia(data, "wanted")
-                : handleRemoveMedia(data, "wanted"))
+                ? handleRemoveMedia(data, "wanted")
+                : handleAddMedia(data, "wanted"))
             }
             className="px-5 py-2 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]"
           >
-            {wantedButtonStatus ? "Add to Wanted" : "Remove from Wanted"}
+            {wantedButtonStatus ? "Remove from Wanted" : "Add to Wanted"}
           </Button>
           <Button
             loading={
               finishedButtonStatus
-                ? removeMediaResults.isLoading
-                : addMediaResults.isLoading
+                ? removeFinishedMediaResults.isLoading
+                : addFinishedMediaResults.isLoading
             }
             onClick={() =>
               data &&
               (finishedButtonStatus
-                ? handleAddMedia(data, "finished")
-                : handleRemoveMedia(data, "finished"))
+                ? handleRemoveMedia(data, "finished")
+                : handleAddMedia(data, "finished"))
             }
             className="px-5 py-2 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]"
           >
-            {finishedButtonStatus ? "Add to Finished" : "Remove from Finished"}
+            {finishedButtonStatus ? "Remove from Finished" : "Add to Finished"}
           </Button>
         </div>
       </div>

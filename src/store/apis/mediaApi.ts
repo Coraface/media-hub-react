@@ -18,6 +18,29 @@ const fetchStatusUrl = (mediaType: string, mediaId: number): string => {
   return `${baseMediaUrl}/${mediaTypePlural}/${mediaId}`;
 };
 
+const createMediaQuery = (media: Media, status: string) => ({
+  method: "POST",
+  headers: {
+    Authorization: "Bearer " + keycloak.token,
+    "Content-Type": "application/json",
+  },
+  url: addMediaUrl + status,
+  body: media,
+});
+
+const createRemoveMediaQuery = (
+  id: number,
+  mediaType: string,
+  status: string
+) => ({
+  method: "DELETE",
+  headers: {
+    Authorization: "Bearer " + keycloak.token,
+    "Content-Type": "application/json",
+  },
+  url: removeMediaUrl + `id=${id}&mediaType=${mediaType}&status=${status}`,
+});
+
 const mediaApi = createApi({
   reducerPath: "media",
   baseQuery: fetchBaseQuery({ baseUrl: apiBaseUrl }),
@@ -40,20 +63,16 @@ const mediaApi = createApi({
         };
       },
     }),
-    addMedia: builder.mutation({
-      query: ({ media, status }: { media: Media; status: string }) => {
-        return {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + keycloak.token,
-            "Content-Type": "application/json",
-          },
-          url: addMediaUrl + status,
-          body: media,
-        };
-      },
+    addWantedMedia: builder.mutation({
+      query: ({ media, status }: { media: Media; status: string }) =>
+        createMediaQuery(media, status),
+      transformResponse: (response: string) => response,
     }),
-    removeMedia: builder.mutation({
+    addFinishedMedia: builder.mutation({
+      query: ({ media, status }: { media: Media; status: string }) =>
+        createMediaQuery(media, status),
+    }),
+    removeWantedMedia: builder.mutation({
       query: ({
         id,
         mediaType,
@@ -62,24 +81,27 @@ const mediaApi = createApi({
         id: number;
         mediaType: string;
         status: string;
-      }) => {
-        return {
-          method: "DELETE",
-          headers: {
-            Authorization: "Bearer " + keycloak.token,
-            "Content-Type": "application/json",
-          },
-          url:
-            removeMediaUrl + `id=${id}&mediaType=${mediaType}&status=${status}`,
-        };
-      },
+      }) => createRemoveMediaQuery(id, mediaType, status),
+    }),
+    removeFinishedMedia: builder.mutation({
+      query: ({
+        id,
+        mediaType,
+        status,
+      }: {
+        id: number;
+        mediaType: string;
+        status: string;
+      }) => createRemoveMediaQuery(id, mediaType, status),
     }),
   }),
 });
 
 export const {
   useFetchMediaStatusQuery,
-  useAddMediaMutation,
-  useRemoveMediaMutation,
+  useAddWantedMediaMutation,
+  useAddFinishedMediaMutation,
+  useRemoveWantedMediaMutation,
+  useRemoveFinishedMediaMutation,
 } = mediaApi;
 export { mediaApi };
