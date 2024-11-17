@@ -4,9 +4,9 @@ import { VscSearch } from "react-icons/vsc";
 import SearchHistoryDropdown from "./SearchHistoryDropDown";
 
 const SearchForm = () => {
-  const [term, setTerm] = useState(""); // Controlled input value
-  const [searchHistory, setSearchHistory] = useState<string[]>([]); // Local state for search history
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown visibility
+  const [term, setTerm] = useState("");
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -25,7 +25,7 @@ const SearchForm = () => {
     setSearchHistory(history);
   };
 
-  // Form submission
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (term.trim()) {
@@ -34,7 +34,7 @@ const SearchForm = () => {
         ...searchHistory.filter((t) => t !== term),
       ].slice(0, 5);
       saveToLocalStorage(updatedHistory);
-      setIsDropdownOpen(false); // Close dropdown after submission
+      setIsDropdownOpen(false);
       navigate(`/search?term=${term}`);
     }
   };
@@ -53,7 +53,24 @@ const SearchForm = () => {
     setIsDropdownOpen(false);
   };
 
-  // Close dropdown on outside click
+  // Handle input focus event to open dropdown if there is search history
+  const handleFocus = () => {
+    console.log("Search hist", searchHistory);
+    if (searchHistory.length > 0) {
+      setIsDropdownOpen(true);
+    }
+  };
+
+  // Handle input change event and close the dropdown immediately
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // For some reason if dropdown is open and we submit
+    // the form, the searchHistory is removed
+    // So when user types, close dropdown
+    setIsDropdownOpen(false);
+    setTerm(e.target.value);
+  };
+
+  // Handle outside click to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -63,6 +80,11 @@ const SearchForm = () => {
         !inputRef.current.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
+      } else if (
+        inputRef.current &&
+        inputRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(true);
       }
     };
 
@@ -77,12 +99,8 @@ const SearchForm = () => {
           ref={inputRef}
           type="text"
           value={term}
-          onChange={(e) => setTerm(e.target.value)}
-          onFocus={() => {
-            if (searchHistory.length > 0) {
-              setIsDropdownOpen(true);
-            }
-          }}
+          onChange={handleChange}
+          onFocus={handleFocus}
           placeholder="Search"
           autoComplete="off"
           className="pr-10 pl-4 py-2 w-full border rounded-full bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
