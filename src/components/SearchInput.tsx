@@ -55,7 +55,6 @@ const SearchForm = () => {
 
   // Handle input focus event to open dropdown if there is search history
   const handleFocus = () => {
-    console.log("Search hist", searchHistory);
     if (searchHistory.length > 0) {
       setIsDropdownOpen(true);
     }
@@ -71,6 +70,7 @@ const SearchForm = () => {
   };
 
   // Handle outside click to close dropdown
+  // and inside to open it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (

@@ -65,7 +65,6 @@ export default function MediaDetailsPage() {
       setFinishedButtonStatus(statusData.isFinished);
     }
   }, [statusData]);
-  console.log("wanted/finished", wantedButtonStatus, finishedButtonStatus);
 
   const [addWantedMedia, addWantedMediaResults] = useAddWantedMediaMutation();
   const [addFinishedMedia, addFinishedMediaResults] =
@@ -76,10 +75,6 @@ export default function MediaDetailsPage() {
     useRemoveFinishedMediaMutation();
 
   useEffect(() => {
-    console.log("addWantedMediaResults:", addWantedMediaResults);
-    console.log("addFinishedMediaResults:", addFinishedMediaResults);
-    console.log("removeWantedMediaResults:", removeWantedMediaResults);
-    console.log("removeFinishedMediaResults:", removeFinishedMediaResults);
     if (addWantedMediaResults.isSuccess) {
       setWantedButtonStatus(true);
       addWantedMediaResults.reset();
