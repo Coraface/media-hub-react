@@ -4,7 +4,7 @@ import useKeycloakAuth from "../hooks/useKeycloakAuth";
 import Button from "./Button";
 
 export default function NavBar() {
-  useKeycloakAuth();
+  const { keycloak } = useKeycloakAuth();
   const navigate = useNavigate();
 
   const handleProfileClick = () => {
@@ -33,7 +33,9 @@ export default function NavBar() {
         onClick={handleProfileClick}
         className="flex items-center justify-center space-x-2 w-12 h-12 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]"
       >
-        <span className="text-sm">P</span>
+        <span className="text-sm">
+          {keycloak?.tokenParsed?.preferred_username.slice(0, 1).toUpperCase()}
+        </span>
       </Button>
     </div>
   );

@@ -13,9 +13,18 @@ export default function useKeycloakAuth() {
       console.log("User is not authenticated");
       navigate("/");
     } else {
-      console.log("User is authenticated");
+      console.log(
+        "User",
+        keycloak.tokenParsed?.preferred_username,
+        "is authenticated"
+      );
     }
-  }, [initialized, keycloak, navigate]);
+  }, [
+    initialized,
+    keycloak.authenticated,
+    keycloak.tokenParsed?.preferred_username,
+    navigate,
+  ]);
 
   return { keycloak, initialized };
 }

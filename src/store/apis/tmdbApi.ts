@@ -27,6 +27,7 @@ export interface MediaDetailsResponse {
   title: string;
   name: string;
   media_type: string;
+  popularity: number;
   release_date: string;
   first_air_date: string;
   overview: string;
@@ -97,26 +98,25 @@ const tmdbApi = createApi({
       queryFn: async (title) => {
         const data = await searchFromTMDB(title);
         console.log("Data: ", data.results);
-        const mappedResults: SearchMediaResponse[] = data.results.map(
-          (data) => {
-            return {
-              id: data.id,
-              title: data.title || data.name,
-              media_type: data.media_type,
-              release_date: data.release_date
-                ? data.release_date.split("-")[0]
-                : data.first_air_date?.split("-")[0],
-              overview: data.overview,
-              poster_path: `${theMovieDb.common.images_uri}w500${data.poster_path}`,
-              genres: (data.genre_ids ?? [])
-                .map(
-                  (id: number) => theMovieDb.common.genreMap[id] || "Unknown"
-                )
-                .join(", "),
-              vote_average: data.vote_average,
-            };
-          }
-        );
+        const mappedResults: Media[] = data.results.map((data) => {
+          return {
+            id: data.id,
+            title: data.title || data.name,
+            media_type: data.media_type,
+            popularity: data.popularity,
+            year: data.release_date
+              ? data.release_date.split("-")[0]
+              : data.first_air_date?.split("-")[0],
+            overview: data.overview,
+            imageUri: data.poster_path
+              ? `${theMovieDb.common.images_uri}w500${data.poster_path}`
+              : undefined,
+            genre: (data.genre_ids ?? [])
+              .map((id: number) => theMovieDb.common.genreMap[id] || "Unknown")
+              .join(", "),
+            rating: data.vote_average,
+          };
+        });
         return { data: mappedResults };
       },
     }),
@@ -130,6 +130,7 @@ const tmdbApi = createApi({
           id: data.id,
           title: data.title || data.name || "Unknown Title",
           media_type: data.title ? "movie" : "tv",
+          popularity: data.popularity,
           year: data.release_date
             ? data.release_date.split("-")[0]
             : data.first_air_date

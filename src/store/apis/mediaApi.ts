@@ -6,16 +6,20 @@ const apiBaseUrl: string = "http://localhost:8081";
 let username: string;
 console.log("Username", keycloak);
 let baseMediaUrl: string;
+let fetchMediaUrl: string;
 let addMediaUrl: string;
 let removeMediaUrl: string;
-const fetchStatusUrl = (mediaType: string, mediaId: number): string => {
+const fetchUrl = (mediaType: string, mediaId?: number): string => {
   const mediaTypePlural = mediaType === "movie" ? "movies" : "series";
   username = keycloak.tokenParsed?.preferred_username;
   baseMediaUrl = `${apiBaseUrl}/api/users/${username}/media`;
+  fetchMediaUrl = `${baseMediaUrl}/${mediaType}?status=`;
   addMediaUrl = `${baseMediaUrl}?status=`;
   removeMediaUrl = `${baseMediaUrl}?`;
   console.log("Username", keycloak.tokenParsed?.preferred_username);
-  return `${baseMediaUrl}/${mediaTypePlural}/${mediaId}`;
+  return mediaId
+    ? `${baseMediaUrl}/${mediaTypePlural}/${mediaId}`
+    : fetchMediaUrl;
 };
 
 const createMediaQuery = (media: Media, status: string) => ({
@@ -42,6 +46,7 @@ const createRemoveMediaQuery = (
 });
 
 const mediaApi = createApi({
+  tagTypes: ["MediaStatus"],
   reducerPath: "media",
   baseQuery: fetchBaseQuery({ baseUrl: apiBaseUrl }),
   endpoints: (builder) => ({
@@ -59,18 +64,49 @@ const mediaApi = createApi({
             Authorization: "Bearer " + keycloak.token,
             "Content-Type": "application/json",
           },
-          url: fetchStatusUrl(mediaType, mediaId),
+          url: fetchUrl(mediaType, mediaId),
+        };
+      },
+      providesTags: (result, error, { mediaId }) =>
+        result ? [{ type: "MediaStatus", id: mediaId }] : [],
+    }),
+    fetchWantedMedia: builder.query({
+      query: (mediaType: string) => {
+        return {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + keycloak.token,
+            "Content-Type": "application/json",
+          },
+          url: fetchUrl(mediaType) + "wanted",
+        };
+      },
+    }),
+    fetchFinishedMedia: builder.query({
+      query: (mediaType: string) => {
+        return {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + keycloak.token,
+            "Content-Type": "application/json",
+          },
+          url: fetchUrl(mediaType) + "finished",
         };
       },
     }),
     addWantedMedia: builder.mutation({
       query: ({ media, status }: { media: Media; status: string }) =>
         createMediaQuery(media, status),
-      transformResponse: (response: string) => response,
+      invalidatesTags: (result, error, { media }) => [
+        { type: "MediaStatus" as const, id: media.id },
+      ],
     }),
     addFinishedMedia: builder.mutation({
       query: ({ media, status }: { media: Media; status: string }) =>
         createMediaQuery(media, status),
+      invalidatesTags: (result, error, { media }) => [
+        { type: "MediaStatus" as const, id: media.id },
+      ],
     }),
     removeWantedMedia: builder.mutation({
       query: ({
@@ -82,6 +118,10 @@ const mediaApi = createApi({
         mediaType: string;
         status: string;
       }) => createRemoveMediaQuery(id, mediaType, status),
+      transformResponse: (response: string) => response,
+      invalidatesTags: (result, error, { id }) => [
+        { type: "MediaStatus" as const, id },
+      ],
     }),
     removeFinishedMedia: builder.mutation({
       query: ({
@@ -93,12 +133,17 @@ const mediaApi = createApi({
         mediaType: string;
         status: string;
       }) => createRemoveMediaQuery(id, mediaType, status),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "MediaStatus" as const, id },
+      ],
     }),
   }),
 });
 
 export const {
   useFetchMediaStatusQuery,
+  useFetchWantedMediaQuery,
+  useFetchFinishedMediaQuery,
   useAddWantedMediaMutation,
   useAddFinishedMediaMutation,
   useRemoveWantedMediaMutation,

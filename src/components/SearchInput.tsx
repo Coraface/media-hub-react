@@ -56,7 +56,9 @@ const SearchForm = () => {
   // Handle input focus event to open dropdown if there is search history
   const handleFocus = () => {
     if (searchHistory.length > 0) {
-      setIsDropdownOpen(true);
+      setIsDropdownOpen(true); // Open only if history exists
+    } else {
+      setIsDropdownOpen(false); // Prevent dropdown from opening
     }
   };
 
@@ -79,18 +81,20 @@ const SearchForm = () => {
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
       ) {
-        setIsDropdownOpen(false);
+        setIsDropdownOpen(false); // Close dropdown
       } else if (
         inputRef.current &&
-        inputRef.current.contains(event.target as Node)
+        inputRef.current.contains(event.target as Node) &&
+        searchHistory.length > 0 // Only open if there is history
       ) {
         setIsDropdownOpen(true);
       }
+      // console.log(searchHistory, isDropdownOpen, inputRef, dropdownRef);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [searchHistory]);
 
   return (
     <form onSubmit={handleSubmit} className="relative">

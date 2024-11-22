@@ -11,6 +11,8 @@ import { Media } from "../api/types/media";
 import Button from "../components/Button";
 import { useEffect, useState } from "react";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
+import { useDispatch } from "react-redux";
+import { setMediaChanged } from "../store/slices/changesSlice";
 
 interface MediaStatusResponse {
   data: {
@@ -32,6 +34,7 @@ const getQueryParam = (param: string) => {
 };
 
 export default function MediaDetailsPage() {
+  const dispatch = useDispatch();
   const id: string = getQueryParam("id");
   const mediaType: string = getQueryParam("media-type");
 
@@ -58,6 +61,8 @@ export default function MediaDetailsPage() {
     boolean | null
   >(null);
 
+  console.log("Buttons", wantedButtonStatus, finishedButtonStatus);
+
   // Set button status when fetched data is available
   useEffect(() => {
     if (statusData) {
@@ -78,25 +83,30 @@ export default function MediaDetailsPage() {
     if (addWantedMediaResults.isSuccess) {
       setWantedButtonStatus(true);
       addWantedMediaResults.reset();
+      dispatch(setMediaChanged(true));
     }
     if (addFinishedMediaResults.isSuccess) {
       setFinishedButtonStatus(true);
       addFinishedMediaResults.reset();
+      dispatch(setMediaChanged(true));
     }
 
     if (removeWantedMediaResults.isSuccess) {
       setWantedButtonStatus(false);
       removeWantedMediaResults.reset();
+      dispatch(setMediaChanged(true));
     }
     if (removeFinishedMediaResults.isSuccess) {
       setFinishedButtonStatus(false);
       removeFinishedMediaResults.reset();
+      dispatch(setMediaChanged(true));
     }
   }, [
     addWantedMediaResults,
     addFinishedMediaResults,
     removeWantedMediaResults,
     removeFinishedMediaResults,
+    dispatch,
   ]);
 
   const handleAddMedia = (data: Media, status: "wanted" | "finished") => {

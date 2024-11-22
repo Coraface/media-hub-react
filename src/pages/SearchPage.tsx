@@ -25,9 +25,12 @@ export default function SearchPage() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading media</div>;
 
-  const renderedMedia = data?.map((media) => {
-    return <MediaCard key={media.id} media={media} />;
-  });
+  const renderedMedia = data
+    ?.filter((media) => media.imageUri)
+    ?.sort((a, b) => b.popularity - a.popularity)
+    ?.map((media) => {
+      return <MediaCard key={media.id} media={media} />;
+    });
 
   return (
     <div className="flex flex-wrap gap-4 justify-center p-4">
