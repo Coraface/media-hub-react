@@ -8,7 +8,7 @@ export default function NavBar() {
   const navigate = useNavigate();
 
   const handleProfileClick = () => {
-    navigate("/profile");
+    navigate(`/profile/${keycloak?.tokenParsed?.preferred_username}`);
   };
 
   return (

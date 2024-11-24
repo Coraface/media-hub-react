@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { useDispatch } from "react-redux";
 import { setMediaChanged } from "../store/slices/changesSlice";
+import { useGetQueryParam } from "../hooks/useGetQueryParam";
+import keycloak from "../keycloak/keycloak";
 
 interface MediaStatusResponse {
   data: {
@@ -23,20 +25,11 @@ interface MediaStatusResponse {
   isLoading: never;
 }
 
-const getQueryParam = (param: string) => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const term = urlParams.get(param);
-
-  if (!term) {
-    throw new Error(`No search term found`);
-  }
-  return term;
-};
-
 export default function MediaDetailsPage() {
   const dispatch = useDispatch();
-  const id: string = getQueryParam("id");
-  const mediaType: string = getQueryParam("media-type");
+  const username = keycloak.tokenParsed?.preferred_username;
+  const id: string = useGetQueryParam("id", false);
+  const mediaType: string = useGetQueryParam("media-type", false);
 
   const { data, error, isLoading } = useFetchMediaDetailsQuery({
     id,
@@ -48,6 +41,7 @@ export default function MediaDetailsPage() {
     error: error2,
     isLoading: isLoading2,
   } = useFetchMediaStatusQuery<MediaStatusResponse>({
+    username: username, // replace with the actual username
     mediaType,
     mediaId: parseInt(id),
   });

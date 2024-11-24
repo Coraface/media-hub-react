@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import useKeycloakAuth from "../hooks/useKeycloakAuth";
-import { useFetchWantedMediaQuery, useFetchFinishedMediaQuery } from "../store";
-import MediaCard from "../components/MediaCard";
+import {
+  useFetchWantedMediaQuery,
+  useFetchFinishedMediaQuery,
+  useFetchUserQuery,
+} from "../store";
 import type { Media } from "../api/types/media";
 import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query";
 import { useDispatch, useSelector } from "react-redux";
 import { setMediaChanged } from "../store/slices/changesSlice";
 import MediaSection from "../components/MediaSection";
+import FriendsList from "../components/FriendsList";
+import { useGetQueryParam } from "../hooks/useGetQueryParam";
 
 interface MediaResponse {
   data: Media[];
@@ -14,17 +19,38 @@ interface MediaResponse {
   isLoading: never;
 }
 
+interface User {
+  username: string;
+  fullName: string;
+  email: string;
+  photoUri: string;
+  bio: string;
+}
+
 const ProfilePage = () => {
-  const { keycloak, initialized } = useKeycloakAuth();
+  const { keycloak } = useKeycloakAuth();
   const dispatch = useDispatch();
-  const hasChanged = useSelector((state: any) => state.changes.hasChanged);
-  const [username, setUsername] = useState<string | null>(null);
+  const usernameParam = useGetQueryParam("profile", true);
+  const hasChanged = useSelector(
+    (state: { changes: { hasChanged: boolean } }) => state.changes.hasChanged
+  );
+  const [username, setUsername] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (keycloak.tokenParsed?.preferred_username) {
-      setUsername(keycloak.tokenParsed.preferred_username);
+      if (usernameParam === keycloak.tokenParsed.preferred_username) {
+        setUsername(keycloak.tokenParsed.preferred_username);
+      } else {
+        setUsername(usernameParam);
+      }
     }
-  }, [keycloak.tokenParsed]);
+  }, [keycloak.tokenParsed, usernameParam]);
+
+  const {
+    data: user,
+    isLoading: isLoadingUser,
+    error: errorUser,
+  } = useFetchUserQuery<User>(username ? username : skipToken);
 
   // RTK Query to get the wanted and finished media
   const {
@@ -32,20 +58,24 @@ const ProfilePage = () => {
     isLoading: isLoadingWantedMovies,
     error: errorWantedMovies,
     refetch: refetchWantedMovies,
-  } = useFetchWantedMediaQuery<MediaResponse>(username ? "movies" : skipToken);
+  } = useFetchWantedMediaQuery<MediaResponse>(
+    username ? { username, mediaType: "movies" } : skipToken
+  );
   const {
     data: wantedSeries,
     isLoading: isLoadingWantedSeries,
     error: errorWantedSeries,
     refetch: refetchWantedSeries,
-  } = useFetchWantedMediaQuery<MediaResponse>(username ? "series" : skipToken);
+  } = useFetchWantedMediaQuery<MediaResponse>(
+    username ? { username, mediaType: "series" } : skipToken
+  );
   const {
     data: finishedMovies,
     isLoading: isLoadingFinishedMovies,
     error: errorFinishedMovies,
     refetch: refetchFinishedMovies,
   } = useFetchFinishedMediaQuery<MediaResponse>(
-    username ? "movies" : skipToken
+    username ? { username, mediaType: "movies" } : skipToken
   );
   const {
     data: finishedSeries,
@@ -53,7 +83,7 @@ const ProfilePage = () => {
     error: errorFinishedSeries,
     refetch: refetchFinishedSeries,
   } = useFetchFinishedMediaQuery<MediaResponse>(
-    username ? "series" : skipToken
+    username ? { username, mediaType: "series" } : skipToken
   );
 
   useEffect(() => {
@@ -100,54 +130,59 @@ const ProfilePage = () => {
         {/* User Info Header */}
         <div className="flex items-center space-x-4">
           <img
-            src={
-              keycloak.tokenParsed?.avatarUrl ||
-              "https://via.placeholder.com/150"
-            }
+            src={user?.photoUri || "https://via.placeholder.com/150"}
             alt="User Avatar"
             className="w-20 h-20 rounded-full object-cover"
           />
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              {keycloak.tokenParsed?.preferred_username || "John Doe"}
+              {username || "John Doe"}
             </h1>
-            <p className="text-gray-600">{keycloak.tokenParsed?.email}</p>
+            <p className="text-gray-600">{user?.email}</p>
           </div>
         </div>
 
-        {/* Media Sections */}
-        <div className="mt-8 space-y-10">
-          {/* Wanted Media */}
-          <MediaSection
-            title="Wanted Movies"
-            mediaData={wantedMovies}
-            placeholderText="No wanted movies available."
-            keyPrefix="wanted-movies"
-            media_type="movie"
-          />
-          <MediaSection
-            title="Wanted Series"
-            mediaData={wantedSeries}
-            placeholderText="No wanted series available."
-            keyPrefix="wanted-series"
-            media_type="tv"
-          />
+        {/* Main Content: Media Sections + Friends Section */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Media Sections */}
+          <div className="lg:col-span-2 space-y-10">
+            {/* Wanted Media */}
+            <MediaSection
+              title="Wanted Movies"
+              mediaData={wantedMovies}
+              placeholderText="No wanted movies available."
+              keyPrefix="wanted-movies"
+              media_type="movie"
+            />
+            <MediaSection
+              title="Wanted Series"
+              mediaData={wantedSeries}
+              placeholderText="No wanted series available."
+              keyPrefix="wanted-series"
+              media_type="tv"
+            />
 
-          {/* Finished Media */}
-          <MediaSection
-            title="Finished Movies"
-            mediaData={finishedMovies}
-            placeholderText="No finished movies available."
-            keyPrefix="finished-movies"
-            media_type="movie"
-          />
-          <MediaSection
-            title="Finished Series"
-            mediaData={finishedSeries}
-            placeholderText="No finished series available."
-            keyPrefix="finished-series"
-            media_type="tv"
-          />
+            {/* Finished Media */}
+            <MediaSection
+              title="Finished Movies"
+              mediaData={finishedMovies}
+              placeholderText="No finished movies available."
+              keyPrefix="finished-movies"
+              media_type="movie"
+            />
+            <MediaSection
+              title="Finished Series"
+              mediaData={finishedSeries}
+              placeholderText="No finished series available."
+              keyPrefix="finished-series"
+              media_type="tv"
+            />
+          </div>
+
+          {/* Friends List */}
+          <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+            <FriendsList username={username} />
+          </div>
         </div>
       </div>
     </div>

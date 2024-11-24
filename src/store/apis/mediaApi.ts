@@ -3,20 +3,22 @@ import { Media } from "../../api/types/media";
 import keycloak from "../../keycloak/keycloak.ts";
 
 const apiBaseUrl: string = "http://localhost:8081";
-let username: string;
-console.log("Username", keycloak);
+let usernameParam: string;
 let baseMediaUrl: string;
 let fetchMediaUrl: string;
 let addMediaUrl: string;
 let removeMediaUrl: string;
-const fetchUrl = (mediaType: string, mediaId?: number): string => {
+const fetchUrl = (
+  username: string,
+  mediaType: string,
+  mediaId?: number
+): string => {
   const mediaTypePlural = mediaType === "movie" ? "movies" : "series";
-  username = keycloak.tokenParsed?.preferred_username;
-  baseMediaUrl = `${apiBaseUrl}/api/users/${username}/media`;
+  usernameParam = username;
+  baseMediaUrl = `${apiBaseUrl}/api/users/${usernameParam}/media`;
   fetchMediaUrl = `${baseMediaUrl}/${mediaType}?status=`;
   addMediaUrl = `${baseMediaUrl}?status=`;
   removeMediaUrl = `${baseMediaUrl}?`;
-  console.log("Username", keycloak.tokenParsed?.preferred_username);
   return mediaId
     ? `${baseMediaUrl}/${mediaTypePlural}/${mediaId}`
     : fetchMediaUrl;
@@ -52,9 +54,11 @@ const mediaApi = createApi({
   endpoints: (builder) => ({
     fetchMediaStatus: builder.query({
       query: ({
+        username,
         mediaType,
         mediaId,
       }: {
+        username: string;
         mediaType: string;
         mediaId: number;
       }) => {
@@ -64,33 +68,45 @@ const mediaApi = createApi({
             Authorization: "Bearer " + keycloak.token,
             "Content-Type": "application/json",
           },
-          url: fetchUrl(mediaType, mediaId),
+          url: fetchUrl(username, mediaType, mediaId),
         };
       },
       providesTags: (result, error, { mediaId }) =>
         result ? [{ type: "MediaStatus", id: mediaId }] : [],
     }),
     fetchWantedMedia: builder.query({
-      query: (mediaType: string) => {
+      query: ({
+        username,
+        mediaType,
+      }: {
+        username: string;
+        mediaType: string;
+      }) => {
         return {
           method: "GET",
           headers: {
             Authorization: "Bearer " + keycloak.token,
             "Content-Type": "application/json",
           },
-          url: fetchUrl(mediaType) + "wanted",
+          url: fetchUrl(username, mediaType) + "wanted",
         };
       },
     }),
     fetchFinishedMedia: builder.query({
-      query: (mediaType: string) => {
+      query: ({
+        username,
+        mediaType,
+      }: {
+        username: string;
+        mediaType: string;
+      }) => {
         return {
           method: "GET",
           headers: {
             Authorization: "Bearer " + keycloak.token,
             "Content-Type": "application/json",
           },
-          url: fetchUrl(mediaType) + "finished",
+          url: fetchUrl(username, mediaType) + "finished",
         };
       },
     }),
