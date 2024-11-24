@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import keycloak from "../../keycloak/keycloak.ts";
+import { User } from "../../api/types/user.ts";
+import { FriendRequest } from "../../api/types/friendRequest.ts";
 
 const apiBaseUrl: string = "http://localhost:8081";
 const getBaseFriendsUrl = (username: string) => {
@@ -13,7 +15,7 @@ const friendshipApi = createApi({
   reducerPath: "friendshipApi",
   baseQuery: fetchBaseQuery({ baseUrl: apiBaseUrl }),
   endpoints: (builder) => ({
-    fetchFriendRequests: builder.query({
+    fetchFriendRequests: builder.query<FriendRequest[], string>({
       query: (username: string) => ({
         method: "GET",
         headers: {
@@ -23,7 +25,7 @@ const friendshipApi = createApi({
         url: getFetchFriendRequestsUrl(username),
       }),
     }),
-    fetchFriendships: builder.query({
+    fetchFriendships: builder.query<User[], string>({
       query: (username: string) => ({
         method: "GET",
         headers: {

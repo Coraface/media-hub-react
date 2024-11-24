@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import keycloak from "../../keycloak/keycloak.ts";
+import { User } from "../../api/types/user.ts";
 
 const apiBaseUrl: string = "http://localhost:8081";
 const getBaseUserUrl = (username: string) => {
@@ -10,7 +11,7 @@ const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({ baseUrl: apiBaseUrl }),
   endpoints: (builder) => ({
-    fetchUser: builder.query({
+    fetchUser: builder.query<User, string>({
       query: (username: string) => ({
         method: "GET",
         headers: {

@@ -12,19 +12,12 @@ import { setMediaChanged } from "../store/slices/changesSlice";
 import MediaSection from "../components/MediaSection";
 import FriendsList from "../components/FriendsList";
 import { useGetQueryParam } from "../hooks/useGetQueryParam";
+import FriendRequests from "../components/FriendRequests";
 
 interface MediaResponse {
   data: Media[];
   error: FetchBaseQueryError;
   isLoading: never;
-}
-
-interface User {
-  username: string;
-  fullName: string;
-  email: string;
-  photoUri: string;
-  bio: string;
 }
 
 const ProfilePage = () => {
@@ -36,6 +29,12 @@ const ProfilePage = () => {
   );
   const [username, setUsername] = useState<string | undefined>(undefined);
 
+  const {
+    data: user,
+    isLoading: isLoadingUser,
+    error: errorUser,
+  } = useFetchUserQuery(username ? username : skipToken);
+
   useEffect(() => {
     if (keycloak.tokenParsed?.preferred_username) {
       if (usernameParam === keycloak.tokenParsed.preferred_username) {
@@ -44,13 +43,7 @@ const ProfilePage = () => {
         setUsername(usernameParam);
       }
     }
-  }, [keycloak.tokenParsed, usernameParam]);
-
-  const {
-    data: user,
-    isLoading: isLoadingUser,
-    error: errorUser,
-  } = useFetchUserQuery<User>(username ? username : skipToken);
+  }, [keycloak.tokenParsed, username, usernameParam]);
 
   // RTK Query to get the wanted and finished media
   const {
@@ -180,8 +173,20 @@ const ProfilePage = () => {
           </div>
 
           {/* Friends List */}
-          <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-            <FriendsList username={username} />
+          <div className="">
+            {/* Friend Requests */}
+            {username === keycloak.tokenParsed?.preferred_username && (
+              <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+                <FriendRequests username={username} />
+              </div>
+            )}
+
+            <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+              <FriendsList
+                username={username}
+                keycloakUser={keycloak.tokenParsed?.preferred_username}
+              />
+            </div>
           </div>
         </div>
       </div>
