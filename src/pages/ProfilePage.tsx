@@ -80,7 +80,7 @@ const ProfilePage = () => {
   );
 
   useEffect(() => {
-    if (hasChanged) {
+    if (hasChanged && username === keycloak.tokenParsed?.preferred_username) {
       if (username) {
         refetchWantedMovies();
         refetchWantedSeries();
@@ -97,6 +97,7 @@ const ProfilePage = () => {
     refetchFinishedMovies,
     refetchFinishedSeries,
     dispatch,
+    keycloak.tokenParsed?.preferred_username,
   ]);
 
   if (

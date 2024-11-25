@@ -3,49 +3,37 @@ import { Media } from "../../api/types/media";
 import keycloak from "../../keycloak/keycloak.ts";
 
 const apiBaseUrl: string = "http://localhost:8081";
-let usernameParam: string;
-let baseMediaUrl: string;
-let fetchMediaUrl: string;
-let addMediaUrl: string;
-let removeMediaUrl: string;
-const fetchUrl = (
+const getBaseMediaUrl = (username: string) =>
+  `${apiBaseUrl}/api/users/${username}/media`;
+
+const getFetchStatusUrl = (
   username: string,
   mediaType: string,
-  mediaId?: number
-): string => {
-  const mediaTypePlural = mediaType === "movie" ? "movies" : "series";
-  usernameParam = username;
-  baseMediaUrl = `${apiBaseUrl}/api/users/${usernameParam}/media`;
-  fetchMediaUrl = `${baseMediaUrl}/${mediaType}?status=`;
-  addMediaUrl = `${baseMediaUrl}?status=`;
-  removeMediaUrl = `${baseMediaUrl}?`;
-  return mediaId
-    ? `${baseMediaUrl}/${mediaTypePlural}/${mediaId}`
-    : fetchMediaUrl;
+  mediaId: number
+) => {
+  const baseMediaUrl = getBaseMediaUrl(username);
+  return `${baseMediaUrl}/${mediaType}/${mediaId}`;
 };
 
-const createMediaQuery = (media: Media, status: string) => ({
-  method: "POST",
-  headers: {
-    Authorization: "Bearer " + keycloak.token,
-    "Content-Type": "application/json",
-  },
-  url: addMediaUrl + status,
-  body: media,
-});
+const getFetchMediaUrl = (username: string, mediaType: string) => {
+  const baseMediaUrl = getBaseMediaUrl(username);
+  return `${baseMediaUrl}/${mediaType}?status=`;
+};
 
-const createRemoveMediaQuery = (
-  id: number,
+const getAddMediaUrl = (username: string, status: string) => {
+  const baseMediaUrl = getBaseMediaUrl(username);
+  return `${baseMediaUrl}?status=${status}`;
+};
+
+const getRemoveMediaUrl = (
+  username: string,
   mediaType: string,
+  mediaId: number,
   status: string
-) => ({
-  method: "DELETE",
-  headers: {
-    Authorization: "Bearer " + keycloak.token,
-    "Content-Type": "application/json",
-  },
-  url: removeMediaUrl + `id=${id}&mediaType=${mediaType}&status=${status}`,
-});
+) => {
+  const baseMediaUrl = getBaseMediaUrl(username);
+  return `${baseMediaUrl}?id=${mediaId}&mediaType=${mediaType}&status=${status}`;
+};
 
 const mediaApi = createApi({
   tagTypes: ["MediaStatus"],
@@ -68,7 +56,7 @@ const mediaApi = createApi({
             Authorization: "Bearer " + keycloak.token,
             "Content-Type": "application/json",
           },
-          url: fetchUrl(username, mediaType, mediaId),
+          url: getFetchStatusUrl(username, mediaType, mediaId),
         };
       },
       providesTags: (result, error, { mediaId }) =>
@@ -88,7 +76,7 @@ const mediaApi = createApi({
             Authorization: "Bearer " + keycloak.token,
             "Content-Type": "application/json",
           },
-          url: fetchUrl(username, mediaType) + "wanted",
+          url: getFetchMediaUrl(username, mediaType) + "wanted",
         };
       },
     }),
@@ -106,34 +94,73 @@ const mediaApi = createApi({
             Authorization: "Bearer " + keycloak.token,
             "Content-Type": "application/json",
           },
-          url: fetchUrl(username, mediaType) + "finished",
+          url: getFetchMediaUrl(username, mediaType) + "finished",
         };
       },
     }),
     addWantedMedia: builder.mutation({
-      query: ({ media, status }: { media: Media; status: string }) =>
-        createMediaQuery(media, status),
+      query: ({
+        username,
+        media,
+        status,
+      }: {
+        username: string;
+        media: Media;
+        status: string;
+      }) => ({
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + keycloak.token,
+          "Content-Type": "application/json",
+        },
+        url: getAddMediaUrl(username, status),
+        body: media,
+      }),
       invalidatesTags: (result, error, { media }) => [
         { type: "MediaStatus" as const, id: media.id },
       ],
     }),
     addFinishedMedia: builder.mutation({
-      query: ({ media, status }: { media: Media; status: string }) =>
-        createMediaQuery(media, status),
+      query: ({
+        username,
+        media,
+        status,
+      }: {
+        username: string;
+        media: Media;
+        status: string;
+      }) => ({
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + keycloak.token,
+          "Content-Type": "application/json",
+        },
+        url: getAddMediaUrl(username, status),
+        body: media,
+      }),
       invalidatesTags: (result, error, { media }) => [
         { type: "MediaStatus" as const, id: media.id },
       ],
     }),
     removeWantedMedia: builder.mutation({
       query: ({
-        id,
+        username,
         mediaType,
+        id,
         status,
       }: {
-        id: number;
+        username: string;
         mediaType: string;
+        id: number;
         status: string;
-      }) => createRemoveMediaQuery(id, mediaType, status),
+      }) => ({
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + keycloak.token,
+          "Content-Type": "application/json",
+        },
+        url: getRemoveMediaUrl(username, mediaType, id, status),
+      }),
       transformResponse: (response: string) => response,
       invalidatesTags: (result, error, { id }) => [
         { type: "MediaStatus" as const, id },
@@ -141,14 +168,23 @@ const mediaApi = createApi({
     }),
     removeFinishedMedia: builder.mutation({
       query: ({
-        id,
+        username,
         mediaType,
+        id,
         status,
       }: {
-        id: number;
+        username: string;
         mediaType: string;
+        id: number;
         status: string;
-      }) => createRemoveMediaQuery(id, mediaType, status),
+      }) => ({
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + keycloak.token,
+          "Content-Type": "application/json",
+        },
+        url: getRemoveMediaUrl(username, mediaType, id, status),
+      }),
       invalidatesTags: (result, error, { id }) => [
         { type: "MediaStatus" as const, id },
       ],

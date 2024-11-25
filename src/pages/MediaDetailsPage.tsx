@@ -10,11 +10,12 @@ import {
 import { Media } from "../api/types/media";
 import Button from "../components/Button";
 import { useEffect, useState } from "react";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
+import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query/react";
 import { useDispatch } from "react-redux";
 import { setMediaChanged } from "../store/slices/changesSlice";
 import { useGetQueryParam } from "../hooks/useGetQueryParam";
 import keycloak from "../keycloak/keycloak";
+import useGetKeycloakUser from "../hooks/useGetKeycloakUser";
 
 interface MediaStatusResponse {
   data: {
@@ -27,9 +28,17 @@ interface MediaStatusResponse {
 
 export default function MediaDetailsPage() {
   const dispatch = useDispatch();
-  const username = keycloak.tokenParsed?.preferred_username;
+  const [username, setUsername] = useState<string | undefined>(
+    useGetKeycloakUser()
+  );
   const id: string = useGetQueryParam("id", false);
   const mediaType: string = useGetQueryParam("media-type", false);
+
+  useEffect(() => {
+    if (keycloak.tokenParsed?.preferred_username) {
+      setUsername(keycloak.tokenParsed.preferred_username);
+    }
+  }, [keycloak.tokenParsed?.preferred_username, setUsername]);
 
   const { data, error, isLoading } = useFetchMediaDetailsQuery({
     id,
@@ -40,12 +49,16 @@ export default function MediaDetailsPage() {
     data: statusData,
     error: error2,
     isLoading: isLoading2,
-  } = useFetchMediaStatusQuery<MediaStatusResponse>({
-    username: username, // replace with the actual username
-    mediaType,
-    mediaId: parseInt(id),
-  });
-  console.log(statusData, error2, isLoading2);
+  } = useFetchMediaStatusQuery<MediaStatusResponse>(
+    username
+      ? {
+          username: username,
+          mediaType: mediaType === "movie" ? "movies" : "series",
+          mediaId: parseInt(id),
+        }
+      : skipToken
+  );
+  console.log(statusData, error2, isLoading2, username);
 
   // true if button should add, false if button should remove
   const [wantedButtonStatus, setWantedButtonStatus] = useState<boolean | null>(
@@ -105,25 +118,31 @@ export default function MediaDetailsPage() {
 
   const handleAddMedia = (data: Media, status: "wanted" | "finished") => {
     if (status === "wanted") {
-      addWantedMedia({ media: data, status });
+      if (username) addWantedMedia({ username, media: data, status });
     } else {
-      addFinishedMedia({ media: data, status });
+      if (username) addFinishedMedia({ username, media: data, status });
     }
   };
 
   const handleRemoveMedia = (data: Media, status: "wanted" | "finished") => {
     if (status === "wanted") {
-      removeWantedMedia({
-        id: data.id,
-        mediaType: data.media_type === "movie" ? "movies" : "series",
-        status,
-      });
+      if (username) {
+        removeWantedMedia({
+          id: data.id,
+          username,
+          mediaType: data.media_type === "movie" ? "movies" : "series",
+          status,
+        });
+      }
     } else {
-      removeFinishedMedia({
-        id: data.id,
-        mediaType: data.media_type === "movie" ? "movies" : "series",
-        status,
-      });
+      if (username) {
+        removeFinishedMedia({
+          id: data.id,
+          username,
+          mediaType: data.media_type === "movie" ? "movies" : "series",
+          status,
+        });
+      }
     }
   };
 
