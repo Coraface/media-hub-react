@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import {
   useFetchFriendRequestsQuery,
   useHandleFriendRequestMutation,
-} from "../store";
+} from "../../store";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Link } from "react-router-dom";
-import Button from "./Button";
-import { FriendRequest } from "../api/types/friendRequest";
+import Button from "../Button";
+import { FriendRequest } from "../../api/types/friendRequest";
 
 interface FriendsListProps {
   username: string | undefined;

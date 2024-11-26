@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import SearchInput from "./SearchInput";
+import SearchInput from "./SearchBar";
 import useKeycloakAuth from "../hooks/useKeycloakAuth";
 import Button from "./Button";
+import { MediaSearchBar } from "./media/MediaSearchBar";
 
 export default function NavBar() {
   const { keycloak } = useKeycloakAuth();
@@ -20,10 +21,10 @@ export default function NavBar() {
         </Link>
       </div>
 
-      {/* Centered Search Bar */}
+      {/* Search Bar */}
       <div className="flex-grow flex justify-center">
         <div className="w-80 max-w-lg">
-          <SearchInput />
+          <MediaSearchBar />
         </div>
       </div>
 

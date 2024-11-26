@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Media } from "../api/types/media";
+import { Media } from "../../api/types/media";
 
 interface MediaCardProps {
   media: Media;

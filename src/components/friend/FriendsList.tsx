@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { CiCircleRemove } from "react-icons/ci";
 import {
   useFetchFriendshipsQuery,
   useRemoveFriendshipMutation,
-} from "../store";
+} from "../../store";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Link } from "react-router-dom";
-import Button from "./Button";
-import { User } from "../api/types/user";
+import Button from "../Button";
+import { User } from "../../api/types/user";
 
 interface FriendsListProps {
   username: string | undefined;
@@ -75,9 +76,11 @@ const FriendsList: React.FC<FriendsListProps> = ({
                 <Button
                   loading={removeFriendResults.isLoading}
                   onClick={() => handleRemoveFriend(friend)}
-                  className="remove bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
+                  variant="icon"
+                  iconSize="text-2xl" // Larger icon size
+                  className="text-red-500 hover:text-red-600"
                 >
-                  Remove
+                  <CiCircleRemove className="text-2xl" />
                 </Button>
               )}
             </li>

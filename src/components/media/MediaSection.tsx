@@ -1,4 +1,4 @@
-import { Media } from "../api/types/media";
+import { Media } from "../../api/types/media";
 import MediaCard from "./MediaCard";
 
 interface MediaSectionProps {

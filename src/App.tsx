@@ -3,11 +3,13 @@ import Root from "./pages/Root";
 import HomePage from "./pages/HomePage";
 import MediaDetailsPage from "./pages/MediaDetailsPage";
 import ProfilePage from "./pages/ProfilePage";
-import SearchPage from "./pages/SearchPage";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import keycloak from "./keycloak/keycloak.ts";
+import MediaSearchPage from "./pages/MediaSearchPage.tsx";
+import { FriendSearch } from "./components/friend/FriendSearchBar.tsx";
+import SearchPage from "./pages/SearchPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -15,7 +17,7 @@ const router = createBrowserRouter([
     element: <Root />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "/search", element: <SearchPage /> },
+      { path: "/search/*", element: <SearchPage /> },
       { path: "/profile/*", element: <ProfilePage /> },
     ],
   },

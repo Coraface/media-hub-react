@@ -1,78 +1,74 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { VscSearch } from "react-icons/vsc";
 import SearchHistoryDropdown from "./SearchHistoryDropDown";
 
-const SearchForm = () => {
+interface SearchBarProps {
+  placeholder?: string;
+  onSearch: (term: string) => void;
+  storageKey?: string;
+  maxHistory?: number;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({
+  placeholder = "Search",
+  onSearch,
+  storageKey = "searchHistory",
+  maxHistory = 5,
+}) => {
   const [term, setTerm] = useState("");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Load search history from localStorage on mount
   useEffect(() => {
-    const storedHistory = JSON.parse(
-      localStorage.getItem("searchHistory") || "[]"
-    );
+    const storedHistory = JSON.parse(localStorage.getItem(storageKey) || "[]");
     setSearchHistory(storedHistory);
-  }, []);
+  }, [storageKey]);
 
-  // Save search history to localStorage when it changes
+  // Save search history to localStorage
   const saveToLocalStorage = (history: string[]) => {
-    localStorage.setItem("searchHistory", JSON.stringify(history));
+    localStorage.setItem(storageKey, JSON.stringify(history));
     setSearchHistory(history);
   };
 
-  // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (term.trim()) {
       const updatedHistory = [
         term,
         ...searchHistory.filter((t) => t !== term),
-      ].slice(0, 5);
+      ].slice(0, maxHistory);
       saveToLocalStorage(updatedHistory);
       setIsDropdownOpen(false);
-      navigate(`/search?term=${term}`);
+      onSearch(term); // Call the onSearch function passed as a prop
     }
   };
 
-  // Handle selecting a term from history
   const handleSelectTerm = (selectedTerm: string) => {
     setTerm(selectedTerm);
     setIsDropdownOpen(false);
-    navigate(`/search?term=${selectedTerm}`);
+    onSearch(selectedTerm); // Use the term directly
   };
 
-  // Handle clearing the search history
   const handleClearHistory = () => {
-    localStorage.removeItem("searchHistory");
+    localStorage.removeItem(storageKey);
     setSearchHistory([]);
     setIsDropdownOpen(false);
   };
 
-  // Handle input focus event to open dropdown if there is search history
   const handleFocus = () => {
     if (searchHistory.length > 0) {
-      setIsDropdownOpen(true); // Open only if history exists
-    } else {
-      setIsDropdownOpen(false); // Prevent dropdown from opening
+      setIsDropdownOpen(true);
     }
   };
 
-  // Handle input change event and close the dropdown immediately
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // For some reason if dropdown is open and we submit
-    // the form, the searchHistory is removed
-    // So when user types, close dropdown
     setIsDropdownOpen(false);
     setTerm(e.target.value);
   };
 
-  // Handle outside click to close dropdown
-  // and inside to open it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -81,15 +77,14 @@ const SearchForm = () => {
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
       ) {
-        setIsDropdownOpen(false); // Close dropdown
+        setIsDropdownOpen(false);
       } else if (
         inputRef.current &&
         inputRef.current.contains(event.target as Node) &&
-        searchHistory.length > 0 // Only open if there is history
+        searchHistory.length > 0
       ) {
         setIsDropdownOpen(true);
       }
-      // console.log(searchHistory, isDropdownOpen, inputRef, dropdownRef);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -105,7 +100,7 @@ const SearchForm = () => {
           value={term}
           onChange={handleChange}
           onFocus={handleFocus}
-          placeholder="Search"
+          placeholder={placeholder}
           autoComplete="off"
           className="pr-10 pl-4 py-2 w-full border rounded-full bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
         />
@@ -113,7 +108,6 @@ const SearchForm = () => {
           <VscSearch className="h-5 w-5 text-gray-500" />
         </div>
 
-        {/* Dropdown */}
         {isDropdownOpen && (
           <SearchHistoryDropdown
             ref={dropdownRef}
@@ -128,4 +122,4 @@ const SearchForm = () => {
   );
 };
 
-export default SearchForm;
+export default SearchBar;

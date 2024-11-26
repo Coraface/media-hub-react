@@ -9,10 +9,11 @@ import type { Media } from "../api/types/media";
 import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query";
 import { useDispatch, useSelector } from "react-redux";
 import { setMediaChanged } from "../store/slices/changesSlice";
-import MediaSection from "../components/MediaSection";
-import FriendsList from "../components/FriendsList";
+import MediaSection from "../components/media/MediaSection";
+import FriendsList from "../components/friend/FriendsList";
 import { useGetQueryParam } from "../hooks/useGetQueryParam";
-import FriendRequests from "../components/FriendRequests";
+import FriendRequests from "../components/friend/FriendRequests";
+import FriendsSection from "../components/friend/FriendsSection";
 
 interface MediaResponse {
   data: Media[];
@@ -173,22 +174,8 @@ const ProfilePage = () => {
             />
           </div>
 
-          {/* Friends List */}
-          <div className="">
-            {/* Friend Requests */}
-            {username === keycloak.tokenParsed?.preferred_username && (
-              <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-                <FriendRequests username={username} />
-              </div>
-            )}
-
-            <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-              <FriendsList
-                username={username}
-                keycloakUser={keycloak.tokenParsed?.preferred_username}
-              />
-            </div>
-          </div>
+          {/* Friends Section */}
+          <FriendsSection username={username} />
         </div>
       </div>
     </div>

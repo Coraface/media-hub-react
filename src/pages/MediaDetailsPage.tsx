@@ -1,4 +1,4 @@
-import MediaCardLabels from "../components/MediaCardLabel";
+import MediaCardLabels from "../components/media/MediaCardLabel";
 import {
   useFetchMediaDetailsQuery,
   useFetchMediaStatusQuery,
