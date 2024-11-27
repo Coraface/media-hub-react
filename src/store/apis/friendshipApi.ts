@@ -12,6 +12,7 @@ const getFetchFriendRequestsUrl = (username: string) => {
 };
 
 const friendshipApi = createApi({
+  tagTypes: ["FriendRequests", "Friends"],
   reducerPath: "friendshipApi",
   baseQuery: fetchBaseQuery({ baseUrl: apiBaseUrl }),
   endpoints: (builder) => ({
@@ -24,6 +25,8 @@ const friendshipApi = createApi({
         },
         url: getFetchFriendRequestsUrl(username),
       }),
+      providesTags: (result, error, username) =>
+        result ? [{ type: "FriendRequests", id: username }] : [],
     }),
     fetchFriendships: builder.query<User[], string>({
       query: (username: string) => ({
@@ -34,6 +37,8 @@ const friendshipApi = createApi({
         },
         url: getBaseFriendsUrl(username),
       }),
+      providesTags: (result, error, username) =>
+        result ? [{ type: "Friends", id: username }] : [],
     }),
     sendFriendRequest: builder.mutation({
       query: ({
@@ -50,6 +55,9 @@ const friendshipApi = createApi({
         },
         url: `${getBaseFriendsUrl(username)}/${friendUsername}`,
       }),
+      invalidatesTags: (result, error, { username }) => [
+        { type: "FriendRequests", id: username },
+      ],
     }),
     handleFriendRequest: builder.mutation({
       query: ({
@@ -69,6 +77,10 @@ const friendshipApi = createApi({
         },
         url: `${getBaseFriendsUrl(username)}/${friendUsername}`,
       }),
+      invalidatesTags: (result, error, { username }) => [
+        { type: "FriendRequests", id: username },
+        { type: "Friends", id: username },
+      ],
     }),
     removeFriendship: builder.mutation({
       query: ({
@@ -85,6 +97,9 @@ const friendshipApi = createApi({
         },
         url: `${getBaseFriendsUrl(username)}/${friendUsername}`,
       }),
+      invalidatesTags: (result, error, { username }) => [
+        { type: "Friends", id: username },
+      ],
     }),
   }),
 });

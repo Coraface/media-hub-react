@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { VscSearch } from "react-icons/vsc";
 import SearchHistoryDropdown from "./SearchHistoryDropDown";
+import GenericDropdown from "./GenericDropdown";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -109,10 +110,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
         </div>
 
         {isDropdownOpen && (
-          <SearchHistoryDropdown
+          <GenericDropdown
             ref={dropdownRef}
-            searchHistory={searchHistory}
-            onSelectTerm={handleSelectTerm}
+            header="Search History"
+            options={searchHistory.map((term) => ({
+              label: term,
+              onClick: () => handleSelectTerm(term),
+            }))}
             onClearHistory={handleClearHistory}
             classNames="absolute top-full left-0 right-0 mt-2 bg-white shadow-lg z-50 border border-gray-200 rounded-md"
           />

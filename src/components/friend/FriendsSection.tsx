@@ -10,8 +10,8 @@ interface FriendsSectionProps {
 
 const FriendsSection: React.FC<FriendsSectionProps> = ({ username }) => {
   return (
-    <div className="flex flex-col justify-between">
-      <div className="w-80 max-w-lg">
+    <div className="flex flex-col space-y-10">
+      <div className="flex max-w-lg justify-center items-center">
         <FriendSearchBar />
       </div>
 

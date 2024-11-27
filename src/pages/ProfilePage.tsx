@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useKeycloakAuth from "../hooks/useKeycloakAuth";
 import {
   useFetchWantedMediaQuery,
   useFetchFinishedMediaQuery,
   useFetchUserQuery,
+  useSendFriendRequestMutation,
+  useFetchFriendshipsQuery,
+  useFetchFriendRequestsQuery,
 } from "../store";
 import type { Media } from "../api/types/media";
 import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query";
 import { useDispatch, useSelector } from "react-redux";
 import { setMediaChanged } from "../store/slices/changesSlice";
 import MediaSection from "../components/media/MediaSection";
-import FriendsList from "../components/friend/FriendsList";
 import { useGetQueryParam } from "../hooks/useGetQueryParam";
-import FriendRequests from "../components/friend/FriendRequests";
 import FriendsSection from "../components/friend/FriendsSection";
+import Button from "../components/Button";
+import { FriendRequest } from "../api/types/friendRequest";
+import { FriendsProvider } from "../context/FriendContext";
 
 interface MediaResponse {
   data: Media[];
@@ -29,7 +33,11 @@ const ProfilePage = () => {
     (state: { changes: { hasChanged: boolean } }) => state.changes.hasChanged
   );
   const [username, setUsername] = useState<string | undefined>(undefined);
+  const [keycloakUsername, setKeycloakUsername] = useState<string | undefined>(
+    undefined
+  );
 
+  // RTK Query for user
   const {
     data: user,
     isLoading: isLoadingUser,
@@ -38,6 +46,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (keycloak.tokenParsed?.preferred_username) {
+      setKeycloakUsername(keycloak.tokenParsed.preferred_username);
       if (usernameParam === keycloak.tokenParsed.preferred_username) {
         setUsername(keycloak.tokenParsed.preferred_username);
       } else {
@@ -46,7 +55,7 @@ const ProfilePage = () => {
     }
   }, [keycloak.tokenParsed, username, usernameParam]);
 
-  // RTK Query to get the wanted and finished media
+  // RTK Queries for media
   const {
     data: wantedMovies,
     isLoading: isLoadingWantedMovies,
@@ -80,8 +89,51 @@ const ProfilePage = () => {
     username ? { username, mediaType: "series" } : skipToken
   );
 
+  // RTK Queries for friends
+  // Fetch friend requests and friends
+  const { data: friendRequests } = useFetchFriendRequestsQuery(
+    keycloakUsername ? keycloakUsername : skipToken
+  );
+  const { data: friends } = useFetchFriendshipsQuery(
+    keycloakUsername ? keycloakUsername : skipToken
+  );
+  console.log(friends, friendRequests);
+
+  const [sendFriendRequest, sendFriendRequestResults] =
+    useSendFriendRequestMutation();
+
+  // Local state to track the friend/request status
+  const [isFriend, setIsFriend] = useState(false);
+  const [isRequestSent, setIsRequestSent] = useState(false);
+
+  // Sync local state with fetched data
   useEffect(() => {
-    if (hasChanged && username === keycloak.tokenParsed?.preferred_username) {
+    if (friends) {
+      setIsFriend(friends.some((friend) => friend.userName === username));
+    }
+    if (friendRequests) {
+      setIsRequestSent(
+        friendRequests.some(
+          (request) => request.requester.userName === username
+        )
+      );
+    }
+  }, [friends, friendRequests, username]);
+  console.log(isFriend, isRequestSent);
+
+  // Handle send friend request
+  const handleSendRequest = async () => {
+    if (!isRequestSent && !isFriend && username && keycloakUsername) {
+      await sendFriendRequest({
+        username: keycloakUsername,
+        friendUsername: username,
+      });
+      setIsRequestSent(true);
+    }
+  };
+
+  useEffect(() => {
+    if (hasChanged && username === keycloakUsername) {
       if (username) {
         refetchWantedMovies();
         refetchWantedSeries();
@@ -98,7 +150,7 @@ const ProfilePage = () => {
     refetchFinishedMovies,
     refetchFinishedSeries,
     dispatch,
-    keycloak.tokenParsed?.preferred_username,
+    keycloakUsername,
   ]);
 
   if (
@@ -123,18 +175,40 @@ const ProfilePage = () => {
     <div className="bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
         {/* User Info Header */}
-        <div className="flex items-center space-x-4">
-          <img
-            src={user?.photoUri || "https://via.placeholder.com/150"}
-            alt="User Avatar"
-            className="w-20 h-20 rounded-full object-cover"
-          />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">
-              {username || "John Doe"}
-            </h1>
-            <p className="text-gray-600">{user?.email}</p>
+        <div className="flex flex-wrap items-center gap-y-6 justify-between mb-[80px]">
+          {/* User Details Section */}
+          <div className="flex items-center space-x-4">
+            <img
+              src={user?.photoUri || "https://via.placeholder.com/150"}
+              alt="User Avatar"
+              className="w-60 h-60 rounded-full object-cover"
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">
+                {username || "John Doe"}
+              </h1>
+              <p className="text-gray-600">{user?.fullName}</p>
+              <p className="text-gray-600">{user?.email}</p>
+            </div>
           </div>
+
+          {/* Buttons Section */}
+          {username !== keycloakUsername && (
+            <div className="flex flex-wrap gap-4 mt-4 sm:mt-0">
+              <Button
+                loading={sendFriendRequestResults?.isLoading}
+                onClick={handleSendRequest}
+                disabled={isRequestSent || isFriend}
+                className="bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition"
+              >
+                {isFriend
+                  ? "Already Friends"
+                  : isRequestSent
+                  ? "Request Sent"
+                  : "+ Add Friend"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Main Content: Media Sections + Friends Section */}

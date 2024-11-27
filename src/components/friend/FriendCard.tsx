@@ -9,7 +9,7 @@ export default function FriendCard({ friend }: { friend: User }) {
     >
       {/* Friend Profile Image */}
       <img
-        className="flex-shrink-0 object-cover w-16 h-16 rounded-full transition-opacity duration-300 hover:opacity-70"
+        className="flex-shrink-0 object-cover w-36 h-36 md:w-40 md:h-40 rounded-full transition-opacity duration-300 hover:opacity-70"
         src={friend.photoUri}
         alt={friend.userName}
       />
@@ -17,11 +17,11 @@ export default function FriendCard({ friend }: { friend: User }) {
       {/* Details Section */}
       <div className="flex flex-col justify-center p-4 leading-tight flex-grow">
         <h5 className="mb-1 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
-          {friend.fullName}
+          {friend.userName}
         </h5>
-        {/* <p className="text-sm font-medium text-gray-700 dark:text-gray-400">
-          Mutual Friends: {friend.mutualFriends}
-        </p> */}
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-400">
+          {friend.fullName}
+        </p>
       </div>
     </Link>
   );
