@@ -55,8 +55,9 @@ const friendshipApi = createApi({
         },
         url: `${getBaseFriendsUrl(username)}/${friendUsername}`,
       }),
-      invalidatesTags: (result, error, { username }) => [
+      invalidatesTags: (result, error, { username, friendUsername }) => [
         { type: "FriendRequests", id: username },
+        { type: "FriendRequests", id: friendUsername },
       ],
     }),
     handleFriendRequest: builder.mutation({

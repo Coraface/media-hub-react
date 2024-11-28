@@ -90,9 +90,8 @@ const ProfilePage = () => {
   );
 
   // RTK Queries for friends
-  // Fetch friend requests and friends
   const { data: friendRequests } = useFetchFriendRequestsQuery(
-    keycloakUsername ? keycloakUsername : skipToken
+    username ? username : skipToken
   );
   const { data: friends } = useFetchFriendshipsQuery(
     keycloakUsername ? keycloakUsername : skipToken
@@ -114,7 +113,7 @@ const ProfilePage = () => {
     if (friendRequests) {
       setIsRequestSent(
         friendRequests.some(
-          (request) => request.requester.userName === username
+          (request) => request.recipient.userName === username
         )
       );
     }
@@ -177,7 +176,7 @@ const ProfilePage = () => {
         {/* User Info Header */}
         <div className="flex flex-wrap items-center gap-y-6 justify-between mb-[80px]">
           {/* User Details Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center space-x-4 gap-y-4">
             <img
               src={user?.photoUri || "https://via.placeholder.com/150"}
               alt="User Avatar"
@@ -212,41 +211,40 @@ const ProfilePage = () => {
         </div>
 
         {/* Main Content: Media Sections + Friends Section */}
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Media Sections */}
-          <div className="lg:col-span-2 space-y-10">
-            {/* Wanted Media */}
-            <MediaSection
-              title="Wanted Movies"
-              mediaData={wantedMovies}
-              placeholderText="No wanted movies available."
-              keyPrefix="wanted-movies"
-              media_type="movie"
-            />
-            <MediaSection
-              title="Wanted Series"
-              mediaData={wantedSeries}
-              placeholderText="No wanted series available."
-              keyPrefix="wanted-series"
-              media_type="tv"
-            />
 
-            {/* Finished Media */}
-            <MediaSection
-              title="Finished Movies"
-              mediaData={finishedMovies}
-              placeholderText="No finished movies available."
-              keyPrefix="finished-movies"
-              media_type="movie"
-            />
-            <MediaSection
-              title="Finished Series"
-              mediaData={finishedSeries}
-              placeholderText="No finished series available."
-              keyPrefix="finished-series"
-              media_type="tv"
-            />
-          </div>
+        <div className="mt-8 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-10 gap-y-8">
+          {/* Media Sections */}
+          {/* Movies */}
+          <MediaSection
+            title="Wanted Movies"
+            mediaData={wantedMovies}
+            placeholderText="No wanted movies available."
+            keyPrefix="wanted-movies"
+            media_type="movie"
+          />
+          <MediaSection
+            title="Finished Movies"
+            mediaData={finishedMovies}
+            placeholderText="No finished movies available."
+            keyPrefix="finished-movies"
+            media_type="movie"
+          />
+
+          {/* Series */}
+          <MediaSection
+            title="Wanted Series"
+            mediaData={wantedSeries}
+            placeholderText="No wanted series available."
+            keyPrefix="wanted-series"
+            media_type="tv"
+          />
+          <MediaSection
+            title="Finished Series"
+            mediaData={finishedSeries}
+            placeholderText="No finished series available."
+            keyPrefix="finished-series"
+            media_type="tv"
+          />
 
           {/* Friends Section */}
           <FriendsSection username={username} />

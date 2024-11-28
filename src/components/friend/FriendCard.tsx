@@ -5,7 +5,7 @@ export default function FriendCard({ friend }: { friend: User }) {
   return (
     <Link
       to={`/profile/${friend.userName}`}
-      className="flex items-center bg-white border border-gray-200 rounded-full shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full max-w-xl overflow-hidden"
+      className="flex items-center bg-white border border-gray-200 rounded-full shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 max-w-xl overflow-hidden"
     >
       {/* Friend Profile Image */}
       <img
@@ -15,7 +15,7 @@ export default function FriendCard({ friend }: { friend: User }) {
       />
 
       {/* Details Section */}
-      <div className="flex flex-col justify-center p-4 leading-tight flex-grow">
+      <div className="flex flex-col flex-wrap justify-center p-4 leading-tight flex-grow">
         <h5 className="mb-1 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
           {friend.userName}
         </h5>

@@ -23,7 +23,7 @@ export default function NavBar() {
   };
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const buttonRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const options = [
