@@ -7,8 +7,6 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import keycloak from "./keycloak/keycloak.ts";
-import MediaSearchPage from "./pages/MediaSearchPage.tsx";
-import { FriendSearch } from "./components/friend/FriendSearchBar.tsx";
 import SearchPage from "./pages/SearchPage.tsx";
 
 const router = createBrowserRouter([

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { VscSearch } from "react-icons/vsc";
-import SearchHistoryDropdown from "./SearchHistoryDropDown";
 import GenericDropdown from "./GenericDropdown";
 
 interface SearchBarProps {

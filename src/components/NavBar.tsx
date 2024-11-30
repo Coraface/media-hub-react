@@ -53,16 +53,16 @@ export default function NavBar() {
 
   console.log(dropdownRef.current, buttonRef.current);
   return (
-    <div className="flex items-center justify-between px-4 py-10 border-b h-14">
+    <div className="flex flex-wrap items-center justify-between px-4 py-10 border-b gap-4">
       {/* Logo aligned to the left */}
-      <div className="flex items-center space-x-2 text-sm">
+      <div className="text-sm">
         <Link to="/" className="text-lg font-bold">
           MediaHub
         </Link>
       </div>
 
       {/* Search Bar */}
-      <div className="flex-grow flex justify-center">
+      <div className="flex justify-center">
         <div className="max-w-lg">
           <MediaSearchBar />
         </div>

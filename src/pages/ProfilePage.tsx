@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import useKeycloakAuth from "../hooks/useKeycloakAuth";
 import {
   useFetchWantedMediaQuery,
@@ -16,14 +16,10 @@ import { setMediaChanged } from "../store/slices/changesSlice";
 import MediaSection from "../components/media/MediaSection";
 import { useGetQueryParam } from "../hooks/useGetQueryParam";
 import FriendsSection from "../components/friend/FriendsSection";
-import Button from "../components/buttons/Button";
-import { FriendRequest } from "../api/types/friendRequest";
-import { FriendsProvider } from "../context/FriendContext";
-import Section from "../components/Section";
-import MediaCard from "../components/media/MediaCard";
 import { User } from "../api/types/user";
 import RemoveFriendButton from "../components/buttons/RemoveFriendButton";
 import AddFriendButton from "../components/buttons/AddFriendButton";
+import { FriendSearchBar } from "../components/friend/FriendSearchBar";
 
 interface MediaResponse {
   data: Media[];
@@ -215,6 +211,11 @@ const ProfilePage = () => {
           </div>
 
           {/* Buttons Section */}
+          {username === keycloakUsername && (
+            <div className="flex max-w-lg justify-center items-center">
+              <FriendSearchBar />
+            </div>
+          )}
           {username !== keycloakUsername && !isFriend && (
             <AddFriendButton
               sendFriendRequestResults={sendFriendRequestResults}
@@ -233,7 +234,10 @@ const ProfilePage = () => {
           )}
         </div>
 
-        {/* Main Content: Media Sections + Friends Section */}
+        {/* Main Content */}
+        <h1 className="mt-8 flex justify-start text-2xl font-bold text-gray-800">
+          {username === keycloakUsername ? "" : `${username}'s`} Interests
+        </h1>
         <div className="mt-8 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-10 gap-y-8">
           {/* Media Section */}
           <MediaSection
@@ -242,8 +246,13 @@ const ProfilePage = () => {
             finishedMovies={finishedMovies}
             finishedSeries={finishedSeries}
           />
+        </div>
 
-          {/* Friends Section */}
+        {/* Friends Section */}
+        <h1 className="mt-20 flex justify-start text-2xl font-bold text-gray-800">
+          {username === keycloakUsername ? "" : `${username}'s`} Friends
+        </h1>
+        <div className="mt-8 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-10 gap-y-8">
           <FriendsSection username={username} />
         </div>
       </div>
