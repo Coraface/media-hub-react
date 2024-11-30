@@ -23,12 +23,7 @@ const FriendsSection: React.FC<FriendsSectionProps> = ({ username }) => {
       )}
 
       {/* Friends List */}
-      <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-        <FriendsList
-          username={username}
-          keycloakUser={keycloak.tokenParsed?.preferred_username}
-        />
-      </div>
+      <FriendsList username={username} />
     </div>
   );
 };

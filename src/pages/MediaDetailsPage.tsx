@@ -8,7 +8,7 @@ import {
   useRemoveFinishedMediaMutation,
 } from "../store";
 import { Media } from "../api/types/media";
-import Button from "../components/Button";
+import Button from "../components/buttons/Button";
 import { useEffect, useState } from "react";
 import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query/react";
 import { useDispatch } from "react-redux";

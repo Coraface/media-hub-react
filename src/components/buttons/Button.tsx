@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { GoSync } from "react-icons/go";
-import { ForwardedRef, ReactNode } from "react";
+import { ReactNode } from "react";
 import React from "react";
 
 interface ButtonProps {
@@ -23,7 +23,7 @@ const Button = React.forwardRef<HTMLButtonElement, Omit<ButtonProps, "ref">>(
     ref
   ) => {
     const baseClasses = classNames(rest.className, {
-      "px-5 py-2 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]":
+      "flex items-center justify-center px-5 py-2 border border-white rounded-full text-white text-md transition-shadow bg-transparent duration-300 hover:shadow-[0_0_0_3px_#fff]":
         variant === "default",
       "flex items-center justify-center": variant === "icon", // Minimal styling for the icon button
     });

@@ -5,7 +5,7 @@ import {
 } from "../../store";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Link } from "react-router-dom";
-import Button from "../Button";
+import Button from "../buttons/Button";
 import { FriendRequest } from "../../api/types/friendRequest";
 
 interface FriendsListProps {

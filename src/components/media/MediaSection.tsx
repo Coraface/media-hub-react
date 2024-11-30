@@ -1,42 +1,91 @@
-import { Media } from "../../api/types/media";
+import Section from "../Section";
 import MediaCard from "./MediaCard";
 
-interface MediaSectionProps {
-  title: string;
-  mediaData: Media[];
-  placeholderText: string;
-  keyPrefix: string;
-  media_type: string;
-}
+import { Media } from "../../api/types/media";
 
-const MediaSection: React.FC<MediaSectionProps> = ({
-  title,
-  mediaData,
-  placeholderText,
-  keyPrefix,
-  media_type,
-}) => (
-  <section className="bg-gray-50 p-6 rounded-lg shadow-md">
-    <h2 className="text-xl font-semibold text-gray-800 mb-6">{title}</h2>
-    <div className="flex flex-row flex-wrap justify-between gap-4">
-      {mediaData?.length > 0 ? (
-        mediaData.slice(0, 5).map((media, index) => {
-          const mediaWithType = { ...media, media_type };
+export default function MediaSection({
+  wantedMovies,
+  finishedMovies,
+  wantedSeries,
+  finishedSeries,
+}: {
+  wantedMovies: Media[];
+  finishedMovies: Media[];
+  wantedSeries: Media[];
+  finishedSeries: Media[];
+}) {
+  return (
+    <>
+      <Section
+        title="Wanted Movies"
+        data={wantedMovies}
+        placeholderText="No wanted movies found."
+        renderItem={(item, index) => {
+          const keyPrefix = "wanted-movies";
           return (
             <MediaCard
               key={
-                media.id ? `${media.id}-${keyPrefix}` : `${keyPrefix}-${index}`
+                item.id ? `${item.id}-${keyPrefix}` : `${keyPrefix}-${index}`
               }
-              media={mediaWithType}
+              media={{ ...item, media_type: "movie" }}
               size="small"
             />
           );
-        })
-      ) : (
-        <p className="col-span-full text-gray-600">{placeholderText}</p>
-      )}
-    </div>
-  </section>
-);
+        }}
+      />
+      <Section
+        title="Finished Movies"
+        data={finishedMovies}
+        placeholderText="No finished movies available."
+        renderItem={(item, index) => {
+          const keyPrefix = "finished-movies";
+          return (
+            <MediaCard
+              key={
+                item.id ? `${item.id}-${keyPrefix}` : `${keyPrefix}-${index}`
+              }
+              media={{ ...item, media_type: "movie" }}
+              size="small"
+            />
+          );
+        }}
+      />
 
-export default MediaSection;
+      {/* Series */}
+      <Section
+        title="Wanted Series"
+        data={wantedSeries}
+        placeholderText="No wanted series available."
+        renderItem={(item, index) => {
+          const keyPrefix = "wanted-series";
+          return (
+            <MediaCard
+              key={
+                item.id ? `${item.id}-${keyPrefix}` : `${keyPrefix}-${index}`
+              }
+              media={{ ...item, media_type: "tv" }}
+              size="small"
+            />
+          );
+        }}
+      />
+      <Section
+        title="Finished Series"
+        data={finishedSeries}
+        placeholderText="No finished series available."
+        renderItem={(item, index) => {
+          const keyPrefix = "finished-series";
+          return (
+            <MediaCard
+              key={
+                item.id ? `${item.id}-${keyPrefix}` : `${keyPrefix}-${index}`
+              }
+              media={{ ...item, media_type: "tv" }}
+              size="small"
+            />
+          );
+        }}
+      />
+    </>
+  );
+}

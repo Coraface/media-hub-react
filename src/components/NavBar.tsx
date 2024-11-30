@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import useKeycloakAuth from "../hooks/useKeycloakAuth";
-import Button from "./Button";
+import Button from "./buttons/Button";
 import { MediaSearchBar } from "./media/MediaSearchBar";
 import { useEffect, useRef, useState } from "react";
 import GenericDropdown from "./GenericDropdown";

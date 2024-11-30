@@ -7,6 +7,7 @@ import {
   useSendFriendRequestMutation,
   useFetchFriendshipsQuery,
   useFetchFriendRequestsQuery,
+  useRemoveFriendshipMutation,
 } from "../store";
 import type { Media } from "../api/types/media";
 import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query";
@@ -15,9 +16,14 @@ import { setMediaChanged } from "../store/slices/changesSlice";
 import MediaSection from "../components/media/MediaSection";
 import { useGetQueryParam } from "../hooks/useGetQueryParam";
 import FriendsSection from "../components/friend/FriendsSection";
-import Button from "../components/Button";
+import Button from "../components/buttons/Button";
 import { FriendRequest } from "../api/types/friendRequest";
 import { FriendsProvider } from "../context/FriendContext";
+import Section from "../components/Section";
+import MediaCard from "../components/media/MediaCard";
+import { User } from "../api/types/user";
+import RemoveFriendButton from "../components/buttons/RemoveFriendButton";
+import AddFriendButton from "../components/buttons/AddFriendButton";
 
 interface MediaResponse {
   data: Media[];
@@ -100,6 +106,23 @@ const ProfilePage = () => {
 
   const [sendFriendRequest, sendFriendRequestResults] =
     useSendFriendRequestMutation();
+
+  const [removeFriend, removeFriendResults] = useRemoveFriendshipMutation();
+  const [localFriends, setLocalFriends] = useState<User[] | undefined>([]);
+
+  const handleRemoveFriend = async () => {
+    const result = await removeFriend({
+      username: keycloakUsername as string,
+      friendUsername: username as string,
+    }).unwrap();
+
+    if (result) {
+      setLocalFriends((prev) =>
+        prev?.filter((f) => f.userName !== keycloakUsername)
+      );
+      setIsFriend(false);
+    }
+  };
 
   // Local state to track the friend/request status
   const [isFriend, setIsFriend] = useState(false);
@@ -192,58 +215,32 @@ const ProfilePage = () => {
           </div>
 
           {/* Buttons Section */}
-          {username !== keycloakUsername && (
-            <div className="flex flex-wrap gap-4 mt-4 sm:mt-0">
-              <Button
-                loading={sendFriendRequestResults?.isLoading}
-                onClick={handleSendRequest}
-                disabled={isRequestSent || isFriend}
-                className="bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition"
-              >
-                {isFriend
-                  ? "Already Friends"
-                  : isRequestSent
-                  ? "Request Sent"
-                  : "+ Add Friend"}
-              </Button>
-            </div>
+          {username !== keycloakUsername && !isFriend && (
+            <AddFriendButton
+              sendFriendRequestResults={sendFriendRequestResults}
+              handleSendRequest={handleSendRequest}
+              isFriend={isFriend}
+              isRequestSent={isRequestSent}
+            />
+          )}
+          {username !== keycloakUsername && isFriend && (
+            <RemoveFriendButton
+              sendFriendRequestResults={sendFriendRequestResults}
+              handleRemoveFriend={handleRemoveFriend}
+              isFriend={isFriend}
+              isRequestSent={isRequestSent}
+            />
           )}
         </div>
 
         {/* Main Content: Media Sections + Friends Section */}
-
         <div className="mt-8 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-10 gap-y-8">
-          {/* Media Sections */}
-          {/* Movies */}
+          {/* Media Section */}
           <MediaSection
-            title="Wanted Movies"
-            mediaData={wantedMovies}
-            placeholderText="No wanted movies available."
-            keyPrefix="wanted-movies"
-            media_type="movie"
-          />
-          <MediaSection
-            title="Finished Movies"
-            mediaData={finishedMovies}
-            placeholderText="No finished movies available."
-            keyPrefix="finished-movies"
-            media_type="movie"
-          />
-
-          {/* Series */}
-          <MediaSection
-            title="Wanted Series"
-            mediaData={wantedSeries}
-            placeholderText="No wanted series available."
-            keyPrefix="wanted-series"
-            media_type="tv"
-          />
-          <MediaSection
-            title="Finished Series"
-            mediaData={finishedSeries}
-            placeholderText="No finished series available."
-            keyPrefix="finished-series"
-            media_type="tv"
+            wantedMovies={wantedMovies}
+            wantedSeries={wantedSeries}
+            finishedMovies={finishedMovies}
+            finishedSeries={finishedSeries}
           />
 
           {/* Friends Section */}
