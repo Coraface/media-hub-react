@@ -16,16 +16,20 @@ const friendshipApi = createApi({
   reducerPath: "friendshipApi",
   baseQuery: fetchBaseQuery({ baseUrl: apiBaseUrl }),
   endpoints: (builder) => ({
-    fetchFriendRequests: builder.query<FriendRequest[], string>({
-      query: (username: string) => ({
+    fetchFriendRequests: builder.query<
+      FriendRequest[],
+      { username: string; type: string }
+    >({
+      query: ({ username, type }) => ({
         method: "GET",
         headers: {
           Authorization: "Bearer " + keycloak.token,
           "Content-Type": "application/json",
         },
+        params: { type },
         url: getFetchFriendRequestsUrl(username),
       }),
-      providesTags: (result, error, username) =>
+      providesTags: (result, error, { username }) =>
         result ? [{ type: "FriendRequests", id: username }] : [],
     }),
     fetchFriendships: builder.query<User[], string>({

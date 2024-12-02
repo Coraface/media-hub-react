@@ -4,9 +4,13 @@ import {
   useHandleFriendRequestMutation,
 } from "../../store";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { Link } from "react-router-dom";
 import Button from "../buttons/Button";
 import { FriendRequest } from "../../api/types/friendRequest";
+import FriendCard from "./FriendCard";
+import { User } from "../../api/types/user";
+import AcceptFriendRequest from "../buttons/AcceptFriendRequest";
+import RejectFriendRequest from "../buttons/RejectFriendRequest";
+import AcceptRejectFlex from "../buttons/AcceptRejectFlex";
 
 interface FriendsListProps {
   username: string | undefined;
@@ -30,7 +34,9 @@ const FriendRequests: React.FC<FriendsListProps> = ({ username }) => {
     isLoading: isLoadingRequests,
     error: errorRequests,
   } = useFetchFriendRequestsQuery(
-    keycloakUsername ? keycloakUsername : skipToken
+    keycloakUsername
+      ? { username: keycloakUsername, type: "received" }
+      : skipToken
   );
 
   useEffect(() => {
@@ -56,9 +62,13 @@ const FriendRequests: React.FC<FriendsListProps> = ({ username }) => {
     }
   };
 
+  const requesters: User[] = (friendRequests ?? []).map(
+    (request) => request.requester
+  );
+
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+      <h2 className="text-xl font-semibold text-gray-800 mb-6">
         Friend Requests
       </h2>
       {isLoadingRequests ? (
@@ -67,35 +77,21 @@ const FriendRequests: React.FC<FriendsListProps> = ({ username }) => {
         <p className="text-gray-600">No requests.</p>
       ) : (
         <ul className="space-y-4" id="friends-list">
-          {friendRequests?.map((request: FriendRequest) => (
+          {requesters?.map((requester: User) => (
             <li
-              key={request.requester.userName}
-              className="flex items-center justify-between border-b pb-4 last:border-b-0"
+              key={requester.userName}
+              className="flex flex-wrap items-center justify-between border-b pb-4 last:border-b-0 gap-4"
             >
-              <Link
-                to={`/profile/${request.requester.userName}`}
-                className="friend-link text-blue-500 hover:underline"
-              >
-                <strong>{request.requester.userName}</strong>
-              </Link>
-              <Button
-                loading={friendRequestActionResults?.isLoading}
-                onClick={() =>
-                  handleFriendRequest(request.requester.userName, "accepted")
-                }
-                className="remove text-white py-1 px-3 rounded hover:bg-green-600"
-              >
-                Accept
-              </Button>
-              <Button
-                loading={friendRequestActionResults?.isLoading}
-                onClick={() =>
-                  handleFriendRequest(request.requester.userName, "rejected")
-                }
-                className="remove text-white py-1 px-3 rounded hover:bg-red-600"
-              >
-                Reject
-              </Button>
+              <FriendCard
+                key={requester.userName}
+                friend={requester}
+                size="small"
+              />
+              <AcceptRejectFlex
+                friendRequestActionResults={friendRequestActionResults}
+                handleFriendRequest={handleFriendRequest}
+                requester={requester.userName}
+              />
             </li>
           ))}
         </ul>

@@ -51,7 +51,6 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  console.log(dropdownRef.current, buttonRef.current);
   return (
     <div className="flex flex-wrap items-center justify-between px-4 py-10 border-b gap-4">
       {/* Logo aligned to the left */}

@@ -8,6 +8,7 @@ import {
   useFetchFriendshipsQuery,
   useFetchFriendRequestsQuery,
   useRemoveFriendshipMutation,
+  useHandleFriendRequestMutation,
 } from "../store";
 import type { Media } from "../api/types/media";
 import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query";
@@ -16,10 +17,7 @@ import { setMediaChanged } from "../store/slices/changesSlice";
 import MediaSection from "../components/media/MediaSection";
 import { useGetQueryParam } from "../hooks/useGetQueryParam";
 import FriendsSection from "../components/friend/FriendsSection";
-import { User } from "../api/types/user";
-import RemoveFriendButton from "../components/buttons/RemoveFriendButton";
-import AddFriendButton from "../components/buttons/AddFriendButton";
-import { FriendSearchBar } from "../components/friend/FriendSearchBar";
+import ProfileSideHeader from "../components/buttons/ProfileSideHeader";
 
 interface MediaResponse {
   data: Media[];
@@ -92,63 +90,50 @@ const ProfilePage = () => {
   );
 
   // RTK Queries for friends
-  const { data: friendRequests } = useFetchFriendRequestsQuery(
-    username ? username : skipToken
+  const { data: receivedFriendRequests } = useFetchFriendRequestsQuery(
+    keycloakUsername
+      ? { username: keycloakUsername, type: "received" }
+      : skipToken
   );
+
+  // Fetch friends for the user whose profile is being viewed
   const { data: friends } = useFetchFriendshipsQuery(
     keycloakUsername ? keycloakUsername : skipToken
   );
-  console.log(friends, friendRequests);
+  console.log(friends, receivedFriendRequests);
 
-  const [sendFriendRequest, sendFriendRequestResults] =
-    useSendFriendRequestMutation();
+  const [friendRequestAction, friendRequestActionResults] =
+    useHandleFriendRequestMutation();
+
+  const handleFriendRequest = async (requester: string, isAccept: string) => {
+    await friendRequestAction({
+      username: keycloakUsername as string,
+      friendUsername: requester,
+      status: isAccept,
+    }).unwrap();
+  };
 
   const [removeFriend, removeFriendResults] = useRemoveFriendshipMutation();
-  const [localFriends, setLocalFriends] = useState<User[] | undefined>([]);
+
+  useEffect(() => {
+    if (friends) {
+      setIsFriend(friends.some((friend) => friend.userName === username));
+    }
+  }, [friends, username]);
 
   const handleRemoveFriend = async () => {
-    const result = await removeFriend({
+    await removeFriend({
       username: keycloakUsername as string,
       friendUsername: username as string,
     }).unwrap();
 
-    if (result) {
-      setLocalFriends((prev) =>
-        prev?.filter((f) => f.userName !== keycloakUsername)
-      );
+    if (removeFriendResults.isSuccess) {
       setIsFriend(false);
     }
   };
 
   // Local state to track the friend/request status
   const [isFriend, setIsFriend] = useState(false);
-  const [isRequestSent, setIsRequestSent] = useState(false);
-
-  // Sync local state with fetched data
-  useEffect(() => {
-    if (friends) {
-      setIsFriend(friends.some((friend) => friend.userName === username));
-    }
-    if (friendRequests) {
-      setIsRequestSent(
-        friendRequests.some(
-          (request) => request.recipient.userName === username
-        )
-      );
-    }
-  }, [friends, friendRequests, username]);
-  console.log(isFriend, isRequestSent);
-
-  // Handle send friend request
-  const handleSendRequest = async () => {
-    if (!isRequestSent && !isFriend && username && keycloakUsername) {
-      await sendFriendRequest({
-        username: keycloakUsername,
-        friendUsername: username,
-      });
-      setIsRequestSent(true);
-    }
-  };
 
   useEffect(() => {
     if (hasChanged && username === keycloakUsername) {
@@ -172,6 +157,8 @@ const ProfilePage = () => {
   ]);
 
   if (
+    username === undefined ||
+    keycloakUsername === undefined ||
     isLoadingWantedMovies ||
     isLoadingWantedSeries ||
     isLoadingFinishedMovies ||
@@ -210,28 +197,17 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Buttons Section */}
-          {username === keycloakUsername && (
-            <div className="flex max-w-lg justify-center items-center">
-              <FriendSearchBar />
-            </div>
-          )}
-          {username !== keycloakUsername && !isFriend && (
-            <AddFriendButton
-              sendFriendRequestResults={sendFriendRequestResults}
-              handleSendRequest={handleSendRequest}
-              isFriend={isFriend}
-              isRequestSent={isRequestSent}
-            />
-          )}
-          {username !== keycloakUsername && isFriend && (
-            <RemoveFriendButton
-              sendFriendRequestResults={sendFriendRequestResults}
-              handleRemoveFriend={handleRemoveFriend}
-              isFriend={isFriend}
-              isRequestSent={isRequestSent}
-            />
-          )}
+          {/* Side Header Section */}
+          <ProfileSideHeader
+            username={username}
+            keycloakUsername={keycloakUsername}
+            friendRequests={receivedFriendRequests}
+            friendRequestActionResults={friendRequestActionResults}
+            handleFriendRequest={handleFriendRequest}
+            isFriend={isFriend}
+            setIsFriend={setIsFriend}
+            handleRemoveFriend={handleRemoveFriend}
+          />
         </div>
 
         {/* Main Content */}

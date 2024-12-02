@@ -22,15 +22,11 @@ export default function RemoveFriendButton({
         disabled={isRequestSent || isFriend}
         className="bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition"
       >
-        {isFriend ? (
+        {isFriend && (
           <>
             <CgUserRemove className="mr-2" />
             Remove Friend
           </>
-        ) : isRequestSent ? (
-          "Request Sent"
-        ) : (
-          "+ Add Friend"
         )}
       </Button>
     </div>
