@@ -40,7 +40,7 @@ export default function MediaDetailsPage() {
     }
   }, [keycloak.tokenParsed?.preferred_username, setUsername]);
 
-  const { data, error, isLoading } = useFetchMediaDetailsQuery({
+  const { data } = useFetchMediaDetailsQuery({
     id,
     mediaType,
   });

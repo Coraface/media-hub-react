@@ -14,7 +14,7 @@ import { skipToken } from "@reduxjs/toolkit/query/react";
 interface ProfileSideHeaderProps {
   username: string;
   keycloakUsername: string;
-  friendRequests: FriendRequest[];
+  friendRequests: FriendRequest[] | undefined;
   isFriend: boolean;
   friendRequestActionResults: { isLoading: boolean };
   handleFriendRequest: (requester: string, isAccept: string) => void;

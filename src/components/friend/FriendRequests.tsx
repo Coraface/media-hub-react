@@ -4,12 +4,9 @@ import {
   useHandleFriendRequestMutation,
 } from "../../store";
 import { skipToken } from "@reduxjs/toolkit/query";
-import Button from "../buttons/Button";
 import { FriendRequest } from "../../api/types/friendRequest";
 import FriendCard from "./FriendCard";
 import { User } from "../../api/types/user";
-import AcceptFriendRequest from "../buttons/AcceptFriendRequest";
-import RejectFriendRequest from "../buttons/RejectFriendRequest";
 import AcceptRejectFlex from "../buttons/AcceptRejectFlex";
 
 interface FriendsListProps {
@@ -29,15 +26,12 @@ const FriendRequests: React.FC<FriendsListProps> = ({ username }) => {
     setUsername(username);
   }, [keycloakUsername, username]);
 
-  const {
-    data: requests,
-    isLoading: isLoadingRequests,
-    error: errorRequests,
-  } = useFetchFriendRequestsQuery(
-    keycloakUsername
-      ? { username: keycloakUsername, type: "received" }
-      : skipToken
-  );
+  const { data: requests, isLoading: isLoadingRequests } =
+    useFetchFriendRequestsQuery(
+      keycloakUsername
+        ? { username: keycloakUsername, type: "received" }
+        : skipToken
+    );
 
   useEffect(() => {
     if (requests) {

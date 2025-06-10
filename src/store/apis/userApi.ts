@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import keycloak from "../../keycloak/keycloak.ts";
 import { User } from "../../api/types/user.ts";
 
-const apiBaseUrl: string = "http://localhost:8081";
+const apiBaseUrl: string = "";
 const getBaseUserUrl = (username: string) => {
   return `${apiBaseUrl}/api/users?user=${username}`;
 };

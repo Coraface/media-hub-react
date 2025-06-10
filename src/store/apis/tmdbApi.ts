@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import theMovieDb from "../../scripts/themoviedb";
-import { Media, SearchMediaResponse } from "../../api/types/media";
+import theMovieDb from "themoviedb";
+import { Media } from "../../api/types/media";
 
 const baseUrl: string = theMovieDb.common.base_uri;
 

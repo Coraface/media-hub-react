@@ -15,11 +15,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ username }) => {
     setUsername(username);
   }, [username]);
 
-  const {
-    data: friends,
-    isLoading: isLoadingFriends,
-    error: errorFriends,
-  } = useFetchFriendshipsQuery(user ? user : skipToken);
+  const { data: friends } = useFetchFriendshipsQuery(user ? user : skipToken);
 
   return (
     <>

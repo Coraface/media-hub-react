@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Media } from "../../api/types/media";
 import keycloak from "../../keycloak/keycloak.ts";
 
-const apiBaseUrl: string = "http://localhost:8081";
+const apiBaseUrl: string = "";
 const getBaseMediaUrl = (username: string) =>
   `${apiBaseUrl}/api/users/${username}/media`;
 
@@ -59,7 +59,7 @@ const mediaApi = createApi({
           url: getFetchStatusUrl(username, mediaType, mediaId),
         };
       },
-      providesTags: (result, error, { mediaId }) =>
+      providesTags: (result, _error, { mediaId }) =>
         result ? [{ type: "MediaStatus", id: mediaId }] : [],
     }),
     fetchWantedMedia: builder.query({
@@ -116,7 +116,7 @@ const mediaApi = createApi({
         url: getAddMediaUrl(username, status),
         body: media,
       }),
-      invalidatesTags: (result, error, { media }) => [
+      invalidatesTags: (_result, _error, { media }) => [
         { type: "MediaStatus" as const, id: media.id },
       ],
     }),
@@ -138,7 +138,7 @@ const mediaApi = createApi({
         url: getAddMediaUrl(username, status),
         body: media,
       }),
-      invalidatesTags: (result, error, { media }) => [
+      invalidatesTags: (_result, _error, { media }) => [
         { type: "MediaStatus" as const, id: media.id },
       ],
     }),
@@ -162,7 +162,7 @@ const mediaApi = createApi({
         url: getRemoveMediaUrl(username, mediaType, id, status),
       }),
       transformResponse: (response: string) => response,
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "MediaStatus" as const, id },
       ],
     }),
@@ -185,7 +185,7 @@ const mediaApi = createApi({
         },
         url: getRemoveMediaUrl(username, mediaType, id, status),
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "MediaStatus" as const, id },
       ],
     }),

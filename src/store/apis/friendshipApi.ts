@@ -3,7 +3,7 @@ import keycloak from "../../keycloak/keycloak.ts";
 import { User } from "../../api/types/user.ts";
 import { FriendRequest } from "../../api/types/friendRequest.ts";
 
-const apiBaseUrl: string = "http://localhost:8081";
+const apiBaseUrl: string = "";
 const getBaseFriendsUrl = (username: string) => {
   return `${apiBaseUrl}/api/users/${username}/friends`;
 };
@@ -29,7 +29,7 @@ const friendshipApi = createApi({
         params: { type },
         url: getFetchFriendRequestsUrl(username),
       }),
-      providesTags: (result, error, { username }) =>
+      providesTags: (result, _error, { username }) =>
         result ? [{ type: "FriendRequests", id: username }] : [],
     }),
     fetchFriendships: builder.query<User[], string>({
@@ -41,7 +41,7 @@ const friendshipApi = createApi({
         },
         url: getBaseFriendsUrl(username),
       }),
-      providesTags: (result, error, username) =>
+      providesTags: (result, _error, username) =>
         result ? [{ type: "Friends", id: username }] : [],
     }),
     sendFriendRequest: builder.mutation({
@@ -59,7 +59,7 @@ const friendshipApi = createApi({
         },
         url: `${getBaseFriendsUrl(username)}/${friendUsername}`,
       }),
-      invalidatesTags: (result, error, { username, friendUsername }) => [
+      invalidatesTags: (_result, _error, { username, friendUsername }) => [
         { type: "FriendRequests", id: username },
         { type: "FriendRequests", id: friendUsername },
       ],
@@ -82,7 +82,7 @@ const friendshipApi = createApi({
         },
         url: `${getBaseFriendsUrl(username)}/${friendUsername}`,
       }),
-      invalidatesTags: (result, error, { username }) => [
+      invalidatesTags: (_result, _error, { username }) => [
         { type: "FriendRequests", id: username },
         { type: "Friends", id: username },
       ],
@@ -102,7 +102,7 @@ const friendshipApi = createApi({
         },
         url: `${getBaseFriendsUrl(username)}/${friendUsername}`,
       }),
-      invalidatesTags: (result, error, { username, friendUsername }) => [
+      invalidatesTags: (_result, _error, { username, friendUsername }) => [
         { type: "Friends", id: friendUsername },
         { type: "Friends", id: username },
       ],

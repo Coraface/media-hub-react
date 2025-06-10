@@ -4,7 +4,6 @@ import {
   useFetchWantedMediaQuery,
   useFetchFinishedMediaQuery,
   useFetchUserQuery,
-  useSendFriendRequestMutation,
   useFetchFriendshipsQuery,
   useFetchFriendRequestsQuery,
   useRemoveFriendshipMutation,
@@ -38,11 +37,7 @@ const ProfilePage = () => {
   );
 
   // RTK Query for user
-  const {
-    data: user,
-    isLoading: isLoadingUser,
-    error: errorUser,
-  } = useFetchUserQuery(username ? username : skipToken);
+  const { data: user } = useFetchUserQuery(username ? username : skipToken);
 
   useEffect(() => {
     if (keycloak.tokenParsed?.preferred_username) {
@@ -205,7 +200,6 @@ const ProfilePage = () => {
             friendRequestActionResults={friendRequestActionResults}
             handleFriendRequest={handleFriendRequest}
             isFriend={isFriend}
-            setIsFriend={setIsFriend}
             handleRemoveFriend={handleRemoveFriend}
           />
         </div>
